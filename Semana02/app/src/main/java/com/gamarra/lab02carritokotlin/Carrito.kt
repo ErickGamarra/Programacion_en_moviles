@@ -1,12 +1,34 @@
 package com.gamarra.lab02carritokotlin
 
+// PARTE 1: DEFINICIÓN DEL MODELO DE DATOS
 data class Producto(
     val nombre: String,
     val precio: Double,
     var cantidad: Int
 )
 
+// PARTE 3: FUNCIONES DE CÁLCULO
+
+fun calcularSubtotal(productos: List<Producto>): Double {
+    var subtotal = 0.0
+    for (p in productos) {
+        subtotal += p.precio * p.cantidad
+    }
+    return subtotal
+}
+
+fun calcularIGV(subtotal: Double): Double {
+    return subtotal * 0.18
+}
+
+fun calcularTotal(subtotal: Double, igv: Double): Double {
+    return subtotal + igv
+}
+
+// FUNCIÓN PRINCIPAL (MAIN)
 fun main() {
+    // PARTE 2: INICIALIZACIÓN Y REGISTRO DE PRODUCTOS
+
     println("=========================================")
     println("   CARRITO DE COMPRAS - TIENDA TECSUP   ")
     println("=========================================")
@@ -24,4 +46,15 @@ fun main() {
     for (producto in carrito) {
         println("Producto agregado: ${producto.nombre} - Cantidad: ${producto.cantidad}")
     }
+
+    // PARTE 3: LLAMADA A FUNCIONES Y RESULTADOS
+
+    val subtotal = calcularSubtotal(carrito)
+    val igv = calcularIGV(subtotal)
+    val total = calcularTotal(subtotal, igv)
+
+    println()
+    println("Subtotal: S/ $subtotal")
+    println("IGV (18%): S/ $igv")
+    println("Total: S/ $total")
 }
