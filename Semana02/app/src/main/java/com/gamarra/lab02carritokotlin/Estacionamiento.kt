@@ -8,10 +8,17 @@ import java.util.Scanner
 const val TARIFA_MOTO = 2.0
 const val TARIFA_AUTO = 4.0
 const val TARIFA_CAMIONETA = 10.0
-const val TARIFA_TRAILER = 20.0 // Nueva categoría incorporada
+const val TARIFA_TRAILER = 20.0
 
-const val RECARGO_TRAMO_2 = 0.20 // 20% (Horas 3 a 5)
-const val RECARGO_TRAMO_3 = 0.50 // 50% (Hora 6 en adelante)
+// Tramos estándar (Moto, Auto, Camioneta)
+const val RECARGO_ESTANDAR_TRAMO_2 = 0.20 // 20% (Horas 3 a 5)
+const val RECARGO_ESTANDAR_TRAMO_3 = 0.50 // 50% (Hora 6 en adelante)
+
+// Tramos específicos para Tráiler
+const val RECARGO_TRAILER_TRAMO_2 = 0.20 // 20% (Horas 3 a 5)
+const val RECARGO_TRAILER_TRAMO_3 = 0.40 // 40% (Horas 6 a 10)
+const val RECARGO_TRAILER_TRAMO_4 = 0.50 // 50% (Hora 11 en adelante)
+
 const val DESCUENTO_FRECUENTE = 0.10 // 10%
 
 // ==========================================
@@ -99,14 +106,18 @@ fun calcularDesgloseHoras(tipoVehiculo: String, horas: Int, tarifaBase: Double):
     val desglose = mutableListOf<RegistroHora>()
 
     for (h in 1..horas) {
-        // Para Tráiler se mantiene tarifa plana (0% recargo) hasta definir su modelo en el siguiente commit
         val (porcentaje, recargoMonto) = if (tipoVehiculo == "TRAILER") {
-            Pair(0, 0.0)
+            when {
+                h <= 2 -> Pair(0, 0.0)
+                h in 3..5 -> Pair(20, tarifaBase * RECARGO_TRAILER_TRAMO_2)
+                h in 6..10 -> Pair(40, tarifaBase * RECARGO_TRAILER_TRAMO_3)
+                else -> Pair(50, tarifaBase * RECARGO_TRAILER_TRAMO_4)
+            }
         } else {
             when {
                 h <= 2 -> Pair(0, 0.0)
-                h in 3..5 -> Pair(20, tarifaBase * RECARGO_TRAMO_2)
-                else -> Pair(50, tarifaBase * RECARGO_TRAMO_3)
+                h in 3..5 -> Pair(20, tarifaBase * RECARGO_ESTANDAR_TRAMO_2)
+                else -> Pair(50, tarifaBase * RECARGO_ESTANDAR_TRAMO_3)
             }
         }
 
