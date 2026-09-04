@@ -19,10 +19,14 @@ const val RECARGO_TRAILER_TRAMO_2 = 0.20 // 20% (Horas 3 a 5)
 const val RECARGO_TRAILER_TRAMO_3 = 0.40 // 40% (Horas 6 a 10)
 const val RECARGO_TRAILER_TRAMO_4 = 0.50 // 50% (Hora 11 en adelante)
 
-const val DESCUENTO_FRECUENTE = 0.10 // 10%
+// Reglas de descuento e impuestos
+const val DESCUENTO_FRECUENTE = 0.10          // 10%
+const val UMBRAL_DESCUENTO_GLOBAL = 500.0     // Superar los S/ 500.00
+const val DESCUENTO_GLOBAL_TASA = 0.20        // 20%
+const val TASA_ITV = 0.18                     // 18%
 
 // ==========================================
-// MODELO DE DATOS
+// MODELOS DE DATOS
 // ==========================================
 data class RegistroHora(
     val hora: Int,
@@ -30,6 +34,15 @@ data class RegistroHora(
     val porcentajeRecargo: Int,
     val recargoMonto: Double,
     val importe: Double
+)
+
+data class ResumenLiquidacion(
+    val subtotalBruto: Double,
+    val descuentoFrecuente: Double,
+    val descuentoGlobal: Double,
+    val subtotalNeto: Double,
+    val impuestoITV: Double,
+    val totalPagar: Double
 )
 
 // ==========================================
@@ -127,11 +140,30 @@ fun calcularDesgloseHoras(tipoVehiculo: String, horas: Int, tarifaBase: Double):
     return desglose
 }
 
-fun calcularLiquidacion(desglose: List<RegistroHora>, esFrecuente: Boolean): Triple<Double, Double, Double> {
-    val subtotal = desglose.sumOf { it.importe }
-    val descuento = if (esFrecuente) subtotal * DESCUENTO_FRECUENTE else 0.0
-    val totalPagar = subtotal - descuento
-    return Triple(subtotal, descuento, totalPagar)
+fun calcularLiquidacion(desglose: List<RegistroHora>, esFrecuente: Boolean): ResumenLiquidacion {
+    val subtotalBruto = desglose.sumOf { it.importe }
+    val descuentoFrecuente = if (esFrecuente) subtotalBruto * DESCUENTO_FRECUENTE else 0.0
+    val baseParaDescuentoGlobal = subtotalBruto - descuentoFrecuente
+
+    // Descuento global del 20% si el total supera los S/ 500.00
+    val descuentoGlobal = if (baseParaDescuentoGlobal > UMBRAL_DESCUENTO_GLOBAL) {
+        baseParaDescuentoGlobal * DESCUENTO_GLOBAL_TASA
+    } else {
+        0.0
+    }
+
+    val subtotalNeto = baseParaDescuentoGlobal - descuentoGlobal
+    val impuestoITV = subtotalNeto * TASA_ITV
+    val totalPagar = subtotalNeto + impuestoITV
+
+    return ResumenLiquidacion(
+        subtotalBruto = subtotalBruto,
+        descuentoFrecuente = descuentoFrecuente,
+        descuentoGlobal = descuentoGlobal,
+        subtotalNeto = subtotalNeto,
+        impuestoITV = impuestoITV,
+        totalPagar = totalPagar
+    )
 }
 
 // ==========================================
@@ -146,9 +178,7 @@ fun mostrarComprobante(
     horas: Int,
     esFrecuente: Boolean,
     desglose: List<RegistroHora>,
-    subtotal: Double,
-    descuento: Double,
-    totalPagar: Double
+    liquidacion: ResumenLiquidacion
 ) {
     println("\n==================================================================")
     println("              RESUMEN DE LIQUIDACIÓN DE SERVICIO                  ")
@@ -178,12 +208,20 @@ fun mostrarComprobante(
     }
 
     println("------------------------------------------------------------------")
-    println(String.format("%-40s | S/ %-9.2f", "TOTAL IMPORTE (SUBTOTAL)", subtotal))
+    println(String.format("%-40s | S/ %-9.2f", "SUBTOTAL BRUTO", liquidacion.subtotalBruto))
+
     if (esFrecuente) {
-        println(String.format("%-40s | -S/ %-8.2f", "DESCUENTO CLIENTE FRECUENTE (10%)", descuento))
+        println(String.format("%-40s | -S/ %-8.2f", "DESCUENTO CLIENTE FRECUENTE (10%)", liquidacion.descuentoFrecuente))
     }
+
+    if (liquidacion.descuentoGlobal > 0.0) {
+        println(String.format("%-40s | -S/ %-8.2f", "DESCUENTO GLOBAL VOLUMEN > S/500 (20%)", liquidacion.descuentoGlobal))
+    }
+
+    println(String.format("%-40s | S/ %-9.2f", "SUBTOTAL NETO (BASE IMPONIBLE)", liquidacion.subtotalNeto))
+    println(String.format("%-40s | S/ %-9.2f", "IMPUESTO ITV (18%)", liquidacion.impuestoITV))
     println("==================================================================")
-    println(String.format("%-40s | S/ %-9.2f", "TOTAL FINAL A PAGAR", totalPagar))
+    println(String.format("%-40s | S/ %-9.2f", "TOTAL FINAL A PAGAR", liquidacion.totalPagar))
     println("==================================================================")
 }
 
@@ -207,8 +245,8 @@ fun main() {
 
     // 2. Procesamiento de cálculos
     val desglose = calcularDesgloseHoras(tipoVehiculo, horas, tarifaBase)
-    val (subtotal, descuento, totalPagar) = calcularLiquidacion(desglose, esFrecuente)
+    val liquidacion = calcularLiquidacion(desglose, esFrecuente)
 
     // 3. Renderizado final
-    mostrarComprobante(cliente, placa, tipoVehiculo, tarifaBase, horas, esFrecuente, desglose, subtotal, descuento, totalPagar)
+    mostrarComprobante(cliente, placa, tipoVehiculo, tarifaBase, horas, esFrecuente, desglose, liquidacion)
 }
