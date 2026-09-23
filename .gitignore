@@ -16,3 +16,5 @@ captures/
 .cxx/
 *.keystore
 !debug.keystore
+.idea/
+**/.idea/
