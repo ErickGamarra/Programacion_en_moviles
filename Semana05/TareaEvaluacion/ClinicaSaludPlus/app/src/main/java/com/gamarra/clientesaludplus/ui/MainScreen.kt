@@ -127,22 +127,86 @@ fun MainScreen() {
                     navController = navController,
                     startDestination = Rutas.INICIO
                 ) {
+
+                    //composable(Rutas.INICIO) {
+                      //  Text(
+                        //    text = "Pantalla de Inicio (Base)",
+                          //  modifier = Modifier.padding(16.dp)
+                       // )
+                   // }
+
+                    // Reemplaza las rutas de arriba para conectarlo con pantallaInicio
                     composable(Rutas.INICIO) {
-                        Text(
-                            text = "Pantalla de Inicio (Base)",
-                            modifier = Modifier.padding(16.dp)
+                        PantallaInicio(
+                            onDoctorClick = { doctorId ->
+                                navController.navigate("perfil/$doctorId")
+                            }
                         )
                     }
+
+                    // Se reemplaza la ruta de abajo
+                    // composable(Rutas.MIS_CITAS) {
+                    //     Text(text = "Pantalla de Mis Citas (Base)", modifier = Modifier.padding(16.dp))
+                    // }
+
+                    // Por esto:
                     composable(Rutas.MIS_CITAS) {
-                        Text(
-                            text = "Pantalla de Mis Citas (Base)",
-                            modifier = Modifier.padding(16.dp)
-                        )
+                        PantallaMisCitas()
                     }
+
+
                     composable(Rutas.HISTORIAL) {
                         Text(
                             text = "Historial Médico (Próximamente)",
                             modifier = Modifier.padding(16.dp)
+                        )
+                    }
+
+                    //Ruta dentro del NavHOst
+                    composable(Rutas.PERFIL) { backStackEntry ->
+                        val doctorId = backStackEntry.arguments?.getString("doctorId")
+                        val doctor = com.gamarra.clientesaludplus.data.mockDoctors.find { it.id == doctorId }
+
+                        PantallaPerfilMedico(
+                            doctor = doctor,
+                            onBackClick = { navController.popBackStack() },
+                            onAgendarClick = { id ->
+                                navController.navigate("agendar/$id")
+                            }
+                        )
+                    }
+
+                    // Ruta de la nueva screen para agendar clientes
+                    composable(Rutas.AGENDAR) { backStackEntry ->
+                        val doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
+                        PantallaAgendarCita(
+                            doctorId = doctorId,
+                            onBackClick = { navController.popBackStack() },
+                            onConfirmarClick = { docId, fecha, hora ->
+                                navController.navigate("confirmacion/$docId/$fecha/$hora")
+                            }
+                        )
+                    }
+
+                    // Conector para la pantalla de confirmacion
+                    composable(Rutas.CONFIRMACION) { backStackEntry ->
+                        val doctorId = backStackEntry.arguments?.getString("doctorId") ?: ""
+                        val fecha = backStackEntry.arguments?.getString("fecha") ?: ""
+                        val hora = backStackEntry.arguments?.getString("hora") ?: ""
+
+                        // Buscamos el nombre del médico según el id recibido
+                        val doctor = com.gamarra.clientesaludplus.data.mockDoctors.find { it.id == doctorId }
+                        val doctorNombre = doctor?.name ?: "Médico general"
+
+                        PantallaConfirmacion(
+                            doctorNombre = doctorNombre,
+                            fecha = fecha,
+                            hora = hora,
+                            onVolverInicio = {
+                                navController.navigate(Rutas.INICIO) {
+                                    popUpTo(Rutas.INICIO) { inclusive = true }
+                                }
+                            }
                         )
                     }
                 }
