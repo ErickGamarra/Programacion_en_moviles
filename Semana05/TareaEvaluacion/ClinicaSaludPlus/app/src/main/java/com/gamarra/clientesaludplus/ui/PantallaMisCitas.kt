@@ -1,6 +1,7 @@
 package com.gamarra.clientesaludplus.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -23,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,64 +34,79 @@ import androidx.compose.ui.unit.dp
 import com.gamarra.clientesaludplus.data.mockInitialAppointments
 import com.gamarra.clientesaludplus.model.Appointment
 import com.gamarra.clientesaludplus.model.AppointmentStatus
+import kotlinx.coroutines.launch
 
 @Composable
 fun PantallaMisCitas() {
     var listaCitas by remember { mutableStateOf(mockInitialAppointments) }
-
-    // Estado básico: guarda la cita que el usuario intenta cancelar
-    // Si es null, el diálogo permanece oculto
     var citaParaCancelar by remember { mutableStateOf<Appointment?>(null) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Mis citas programadas",
-            style = MaterialTheme.typography.titleLarge
-        )
+    // Estados para la gestión del mensaje emergente (Snackbar)
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (listaCitas.isEmpty()) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
             Text(
-                text = "No tienes citas registradas.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "Mis citas programadas",
+                style = MaterialTheme.typography.titleLarge
             )
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(listaCitas) { cita ->
-                    TarjetaCita(
-                        cita = cita,
-                        onCancelar = {
-                            // En lugar de borrar de golpe, guardamos la cita para detonar el diálogo
-                            citaParaCancelar = cita
-                        }
-                    )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (listaCitas.isEmpty()) {
+                Text(
+                    text = "No tienes citas registradas.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(listaCitas) { cita ->
+                        TarjetaCita(
+                            cita = cita,
+                            onCancelar = {
+                                citaParaCancelar = cita
+                            }
+                        )
+                    }
                 }
             }
         }
+
+        // Host visual para renderizar las alertas emergentes
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 
-    // Mejora IA: AlertDialog de confirmación
+    // Modal de confirmación
     if (citaParaCancelar != null) {
+        val doctorCancelado = citaParaCancelar?.doctorName ?: ""
         AlertDialog(
             onDismissRequest = { citaParaCancelar = null },
             title = { Text("Cancelar cita") },
             text = {
-                Text("¿Estás seguro de que deseas cancelar tu cita con ${citaParaCancelar?.doctorName}?")
+                Text("¿Estás seguro de que deseas cancelar tu cita con $doctorCancelado?")
             },
             confirmButton = {
                 TextButton(
                     onClick = {
                         listaCitas = listaCitas.filterNot { it.id == citaParaCancelar?.id }
                         citaParaCancelar = null
+
+                        // Notificación Snackbar al completar la cancelación
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("Cita con $doctorCancelado cancelada correctamente")
+                        }
                     },
                     colors = ButtonDefaults.textButtonColors(
                         contentColor = MaterialTheme.colorScheme.error
