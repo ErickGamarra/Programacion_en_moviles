@@ -38,7 +38,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.gamarra.tecsupfit.data.mockGymClasses
 import com.gamarra.tecsupfit.model.FilterPeriod
 import com.gamarra.tecsupfit.model.GymClass
 import com.gamarra.tecsupfit.ui.theme.FitGrisFondo
@@ -48,12 +47,13 @@ import com.gamarra.tecsupfit.ui.theme.FitVerdePrincipal
 
 @Composable
 fun PantallaInicio(
+    clases: List<GymClass>,
     onClassClick: (String) -> Unit
 ) {
     var selectedPeriod by remember { mutableStateOf(FilterPeriod.HOY) }
 
-    val filteredClasses = remember(selectedPeriod) {
-        mockGymClasses.filter { it.period == selectedPeriod }
+    val filteredClasses = remember(selectedPeriod, clases) {
+        clases.filter { it.period == selectedPeriod }
     }
 
     Column(
@@ -61,7 +61,7 @@ fun PantallaInicio(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Cabecera institucional verde oscura
+        // Cabecera institucional verde
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,7 +88,7 @@ fun PantallaInicio(
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        // Filtro horizontal LazyRow: "Hoy" y "Esta semana"
+        // Filtros de período
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
             contentPadding = PaddingValues(horizontal = 20.dp),
@@ -121,7 +121,6 @@ fun PantallaInicio(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Lista de clases disponibles con LazyColumn
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -129,7 +128,7 @@ fun PantallaInicio(
             contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(filteredClasses) { gymClass ->
+            items(filteredClasses, key = { it.id }) { gymClass ->
                 TarjetaClaseItem(
                     gymClass = gymClass,
                     onClick = { onClassClick(gymClass.id) }
@@ -158,7 +157,6 @@ fun TarjetaClaseItem(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Contenedor redondeado con ícono de mancuerna
             Box(
                 modifier = Modifier
                     .size(52.dp)
