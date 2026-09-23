@@ -21,9 +21,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FitnessCenter
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -42,8 +44,10 @@ import com.gamarra.tecsupfit.model.FilterPeriod
 import com.gamarra.tecsupfit.model.GymClass
 import com.gamarra.tecsupfit.ui.theme.FitGrisFondo
 import com.gamarra.tecsupfit.ui.theme.FitGrisTexto
+import com.gamarra.tecsupfit.ui.theme.FitVerdeBadgeFondo
 import com.gamarra.tecsupfit.ui.theme.FitVerdeContenedor
 import com.gamarra.tecsupfit.ui.theme.FitVerdePrincipal
+import com.gamarra.tecsupfit.ui.theme.FitVerdeTexto
 
 @Composable
 fun PantallaInicio(
@@ -61,7 +65,7 @@ fun PantallaInicio(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // Cabecera institucional verde
+        // Cabecera institucional
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,13 +92,13 @@ fun PantallaInicio(
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        // Filtros de período
+        // Filtro de periodos
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
             contentPadding = PaddingValues(horizontal = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            items(FilterPeriod.values()) { period ->
+            items(FilterPeriod.entries.toTypedArray()) { period ->
                 val isSelected = period == selectedPeriod
                 Surface(
                     shape = CircleShape,
@@ -131,7 +135,11 @@ fun PantallaInicio(
             items(filteredClasses, key = { it.id }) { gymClass ->
                 TarjetaClaseItem(
                     gymClass = gymClass,
-                    onClick = { onClassClick(gymClass.id) }
+                    onClick = {
+                        if (gymClass.availableSlots > 0) {
+                            onClassClick(gymClass.id)
+                        }
+                    }
                 )
             }
         }
@@ -143,49 +151,105 @@ fun TarjetaClaseItem(
     gymClass: GymClass,
     onClick: () -> Unit
 ) {
+    val tieneCupos = gymClass.availableSlots > 0
+    val ultimosCupos = gymClass.availableSlots in 1..3
+    val porcentajeOcupacion = if (gymClass.totalSlots > 0) {
+        (gymClass.totalSlots - gymClass.availableSlots).toFloat() / gymClass.totalSlots.toFloat()
+    } else 0f
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable(enabled = tieneCupos) { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = FitGrisFondo),
+        colors = CardDefaults.cardColors(
+            containerColor = if (tieneCupos) FitGrisFondo else Color(0xFFF7F7F7)
+        ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(FitVerdeContenedor),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.FitnessCenter,
-                    contentDescription = null,
-                    tint = FitVerdePrincipal,
-                    modifier = Modifier.size(28.dp)
-                )
+                // Icono representativo o bloqueo si está agotado
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(if (tieneCupos) FitVerdeContenedor else Color(0xFFE0E0E0)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (tieneCupos) Icons.Outlined.FitnessCenter else Icons.Outlined.Lock,
+                        contentDescription = null,
+                        tint = if (tieneCupos) FitVerdePrincipal else Color.Gray,
+                        modifier = Modifier.size(26.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = gymClass.name,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = if (tieneCupos) Color.Black else Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "${gymClass.time} · ${gymClass.room}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = FitGrisTexto
+                    )
+                }
+
+                // Badge de disponibilidad contextual
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = when {
+                        !tieneCupos -> Color(0xFFFFEBEE)
+                        ultimosCupos -> Color(0xFFFFF3E0)
+                        else -> FitVerdeBadgeFondo
+                    }
+                ) {
+                    Text(
+                        text = when {
+                            !tieneCupos -> "Agotado"
+                            ultimosCupos -> "¡Últimos ${gymClass.availableSlots}!"
+                            else -> "${gymClass.availableSlots} cupos"
+                        },
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = when {
+                            !tieneCupos -> Color(0xFFC62828)
+                            ultimosCupos -> Color(0xFFE65100)
+                            else -> FitVerdeTexto
+                        },
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = gymClass.name,
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "${gymClass.time} · ${gymClass.room}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = FitGrisTexto
-                )
-            }
+            // Barra indicadora de nivel de ocupación
+            LinearProgressIndicator(
+                progress = { porcentajeOcupacion },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp)),
+                color = when {
+                    !tieneCupos -> Color.Gray
+                    ultimosCupos -> Color(0xFFE65100)
+                    else -> FitVerdePrincipal
+                },
+                trackColor = Color(0xFFE0E0E0)
+            )
         }
     }
 }
