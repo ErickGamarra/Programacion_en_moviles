@@ -45,8 +45,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
 
-    // Dependencias de navegacion e iconos para la evaluacion
-    implementation("androidx.navigation:navigation-compose:2.8.5")
+    // Ajuste de version para compatibilidad con el BOM actual
+    implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.compose.material:material-icons-extended")
 
     testImplementation(libs.junit)

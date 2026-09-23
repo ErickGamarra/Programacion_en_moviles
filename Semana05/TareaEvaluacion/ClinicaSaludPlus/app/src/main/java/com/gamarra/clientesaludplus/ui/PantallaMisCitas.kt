@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -17,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,8 +33,11 @@ import com.gamarra.clientesaludplus.model.AppointmentStatus
 
 @Composable
 fun PantallaMisCitas() {
-    // Estado local con la lista inicial de citas
     var listaCitas by remember { mutableStateOf(mockInitialAppointments) }
+
+    // Estado básico: guarda la cita que el usuario intenta cancelar
+    // Si es null, el diálogo permanece oculto
+    var citaParaCancelar by remember { mutableStateOf<Appointment?>(null) }
 
     Column(
         modifier = Modifier
@@ -60,21 +65,50 @@ fun PantallaMisCitas() {
                 items(listaCitas) { cita ->
                     TarjetaCita(
                         cita = cita,
-                        onCancelar = { citaId ->
-                            // Cancelación directa simple (sin confirmación, ideal para optimizar en mejora-ia)
-                            listaCitas = listaCitas.filterNot { it.id == citaId }
+                        onCancelar = {
+                            // En lugar de borrar de golpe, guardamos la cita para detonar el diálogo
+                            citaParaCancelar = cita
                         }
                     )
                 }
             }
         }
     }
+
+    // Mejora IA: AlertDialog de confirmación
+    if (citaParaCancelar != null) {
+        AlertDialog(
+            onDismissRequest = { citaParaCancelar = null },
+            title = { Text("Cancelar cita") },
+            text = {
+                Text("¿Estás seguro de que deseas cancelar tu cita con ${citaParaCancelar?.doctorName}?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        listaCitas = listaCitas.filterNot { it.id == citaParaCancelar?.id }
+                        citaParaCancelar = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Sí, cancelar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { citaParaCancelar = null }) {
+                    Text("No")
+                }
+            }
+        )
+    }
 }
 
 @Composable
 fun TarjetaCita(
     cita: Appointment,
-    onCancelar: (String) -> Unit
+    onCancelar: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -94,7 +128,6 @@ fun TarjetaCita(
                     text = cita.doctorName,
                     style = MaterialTheme.typography.titleMedium
                 )
-                // Indicador simple de estado
                 Surface(
                     shape = MaterialTheme.shapes.small,
                     color = if (cita.status == AppointmentStatus.CONFIRMADA)
@@ -129,11 +162,10 @@ fun TarjetaCita(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            // Opción de cancelar solo si la cita está confirmada
             if (cita.status == AppointmentStatus.CONFIRMADA) {
                 Spacer(modifier = Modifier.height(12.dp))
                 OutlinedButton(
-                    onClick = { onCancelar(cita.id) },
+                    onClick = onCancelar,
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.error
                     ),
