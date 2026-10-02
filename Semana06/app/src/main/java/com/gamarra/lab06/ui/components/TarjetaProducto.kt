@@ -1,50 +1,21 @@
 package com.gamarra.lab06.ui.components
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.ShoppingBag
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.gamarra.lab06.data.Producto
 
-/**£“
- * Componente TarjetaProducto (Hito 2 - Commit 4)
- * - Muestra la información básica del Producto (nombre, precio, icono).
- * - Incorpora un DropdownMenu contextual.
- * - Implementación de feedback interactivo mediante Toasts al seleccionar "Ver detalle", "Editar" o "Eliminar".
- */
 @Composable
 fun TarjetaProducto(
     producto: Producto,
+    onAgregarFavorito: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -70,33 +41,19 @@ fun TarjetaProducto(
                     modifier = Modifier.size(48.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.Default.ShoppingBag,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
+                        Icon(Icons.Default.ShoppingBag, contentDescription = null)
                     }
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
-                    Text(
-                        text = producto.nombre,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                    Text(
-                        text = "S/ ${producto.precio}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text(producto.nombre, style = MaterialTheme.typography.titleMedium)
+                    Text(producto.precioFormateado, style = MaterialTheme.typography.bodyMedium)
                 }
             }
 
             Box {
                 IconButton(onClick = { expanded = true }) {
-                    Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = "Opciones"
-                    )
+                    Icon(Icons.Default.MoreVert, contentDescription = "Opciones")
                 }
 
                 DropdownMenu(
@@ -104,33 +61,28 @@ fun TarjetaProducto(
                     onDismissRequest = { expanded = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Ver detalle") },
-                        leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
+                        text = { Text("Favoritos") },
+                        leadingIcon = { Icon(Icons.Default.Favorite, contentDescription = null) },
                         onClick = {
                             expanded = false
-                            Toast.makeText(context, "Ver detalle: ${producto.nombre}", Toast.LENGTH_SHORT).show()
+                            onAgregarFavorito()
+                            Toast.makeText(context, "Añadido a Favoritos", Toast.LENGTH_SHORT).show()
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Editar") },
-                        leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
+                        text = { Text("Compartir") },
+                        leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) },
                         onClick = {
                             expanded = false
-                            Toast.makeText(context, "Editar: ${producto.nombre}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Compartir ${producto.nombre}", Toast.LENGTH_SHORT).show()
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Eliminar") },
-                        leadingIcon = {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        },
+                        text = { Text("Reportar") },
+                        leadingIcon = { Icon(Icons.Default.Warning, contentDescription = null) },
                         onClick = {
                             expanded = false
-                            Toast.makeText(context, "Eliminar: ${producto.nombre}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Reportar ${producto.nombre}", Toast.LENGTH_SHORT).show()
                         }
                     )
                 }
