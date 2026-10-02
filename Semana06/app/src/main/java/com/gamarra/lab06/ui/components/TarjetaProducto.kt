@@ -1,5 +1,6 @@
 package com.gamarra.lab06.ui.components
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,15 +32,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.gamarra.lab06.data.Producto
 
+/**£“
+ * Componente TarjetaProducto (Hito 2 - Commit 4)
+ * - Muestra la información básica del Producto (nombre, precio, icono).
+ * - Incorpora un DropdownMenu contextual.
+ * - Implementación de feedback interactivo mediante Toasts al seleccionar "Ver detalle", "Editar" o "Eliminar".
+ */
 @Composable
 fun TarjetaProducto(
     producto: Producto,
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Card(
         modifier = modifier
@@ -97,12 +106,18 @@ fun TarjetaProducto(
                     DropdownMenuItem(
                         text = { Text("Ver detalle") },
                         leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
-                        onClick = { expanded = false }
+                        onClick = {
+                            expanded = false
+                            Toast.makeText(context, "Ver detalle: ${producto.nombre}", Toast.LENGTH_SHORT).show()
+                        }
                     )
                     DropdownMenuItem(
                         text = { Text("Editar") },
                         leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
-                        onClick = { expanded = false }
+                        onClick = {
+                            expanded = false
+                            Toast.makeText(context, "Editar: ${producto.nombre}", Toast.LENGTH_SHORT).show()
+                        }
                     )
                     DropdownMenuItem(
                         text = { Text("Eliminar") },
@@ -113,7 +128,10 @@ fun TarjetaProducto(
                                 tint = MaterialTheme.colorScheme.error
                             )
                         },
-                        onClick = { expanded = false }
+                        onClick = {
+                            expanded = false
+                            Toast.makeText(context, "Eliminar: ${producto.nombre}", Toast.LENGTH_SHORT).show()
+                        }
                     )
                 }
             }
