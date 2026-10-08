@@ -141,7 +141,10 @@ object Repositorio {
     }
 
     fun citasDelUsuario(): List<Cita> {
-        TODO("Implementar citasDelUsuario")
+        val usuario = usuarioActual ?: return emptyList()
+        return citas
+            .filter { it.usuarioId == usuario.id }
+            .sortedWith(compareBy({ it.fecha }, { it.hora }))
     }
 
     fun cancelarCita(citaId: Int): Boolean {
