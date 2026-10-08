@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.saludplus.citas.navigation.Rutas
 import com.saludplus.citas.repository.Repositorio
+import com.saludplus.citas.ui.components.BarraNavegacion
 import com.saludplus.citas.ui.components.TarjetaAcceso
 import com.saludplus.citas.ui.components.TarjetaEspecialidad
 
@@ -53,7 +54,8 @@ fun HomeScreen(
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
-        }
+        },
+        bottomBar = { BarraNavegacion(Rutas.HOME, onNavegarBarra) }
     ) { padding ->
         Column(
             modifier = Modifier
