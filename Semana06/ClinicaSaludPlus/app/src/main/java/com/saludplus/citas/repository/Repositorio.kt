@@ -81,29 +81,32 @@ object Repositorio {
     // Especialidades
 
     fun buscarEspecialidades(consulta: String): List<Especialidad> {
-        TODO("Implementar buscarEspecialidades")
+        return especialidades.filter { it.nombre.contains(consulta.trim(), ignoreCase = true) }
     }
 
     fun especialidadesDestacadas(): List<Especialidad> {
-        TODO("Implementar especialidadesDestacadas")
+        return especialidades.filter { it.destacada }.take(4)
     }
 
     fun obtenerEspecialidad(id: Int): Especialidad? {
-        TODO("Implementar obtenerEspecialidad")
+        return especialidades.find { it.id == id }
     }
 
     // Medicos
 
     fun obtenerMedico(id: Int): Medico? {
-        TODO("Implementar obtenerMedico")
+        return medicos.find { it.id == id }
     }
 
     fun medicosPorEspecialidad(especialidadId: Int): List<Medico> {
-        TODO("Implementar medicosPorEspecialidad")
+        return medicos
+            .filter { it.especialidadId == especialidadId }
+            .sortedByDescending { it.calificacion }
     }
 
     fun buscarMedicos(especialidadId: Int, consulta: String): List<Medico> {
-        TODO("Implementar buscarMedicos")
+        return medicosPorEspecialidad(especialidadId)
+            .filter { it.nombre.contains(consulta.trim(), ignoreCase = true) }
     }
 
     // Citas
