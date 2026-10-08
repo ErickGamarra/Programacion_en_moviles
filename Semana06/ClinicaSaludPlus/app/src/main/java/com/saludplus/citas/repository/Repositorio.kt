@@ -112,7 +112,10 @@ object Repositorio {
     // Citas
 
     fun horariosDisponibles(medicoId: Int, fecha: String): List<String> {
-        TODO("Implementar horariosDisponibles")
+        val ocupados = citas
+            .filter { it.medicoId == medicoId && it.fecha == fecha }
+            .map { it.hora }
+        return horariosBase.filter { it !in ocupados }
     }
 
     fun obtenerCita(id: Int): Cita? {
