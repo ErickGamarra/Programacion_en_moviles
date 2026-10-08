@@ -3,6 +3,7 @@ package com.saludplus.citas.repository
 import com.saludplus.citas.model.Cita
 import com.saludplus.citas.model.Especialidad
 import com.saludplus.citas.model.Medico
+import com.saludplus.citas.model.Resultado
 import com.saludplus.citas.model.Usuario
 
 object Repositorio {
@@ -40,6 +41,14 @@ object Repositorio {
     )
 
     val citas = mutableListOf<Cita>()
+
+    val resultados = listOf(
+        Resultado(1, "Hemograma completo", "2026-09-28", "Disponible"),
+        Resultado(2, "Perfil lipidico", "2026-09-30", "Disponible"),
+        Resultado(3, "Electrocardiograma", "2026-10-02", "Disponible"),
+        Resultado(4, "Radiografia de torax", "2026-10-06", "En proceso"),
+        Resultado(5, "Examen de orina", "2026-10-07", "En proceso")
+    )
 
     val horariosBase = listOf(
         "08:00", "09:00", "10:00", "11:00",
