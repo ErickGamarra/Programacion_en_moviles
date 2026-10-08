@@ -123,7 +123,21 @@ object Repositorio {
     }
 
     fun agendarCita(medicoId: Int, fecha: String, hora: String): Boolean {
-        TODO("Implementar agendarCita")
+        val usuario = usuarioActual ?: return false
+        val medico = obtenerMedico(medicoId) ?: return false
+        if (hora !in horariosDisponibles(medicoId, fecha)) return false
+
+        citas.add(
+            Cita(
+                id = (citas.maxOfOrNull { it.id } ?: 0) + 1,
+                usuarioId = usuario.id,
+                medicoId = medicoId,
+                especialidadId = medico.especialidadId,
+                fecha = fecha,
+                hora = hora
+            )
+        )
+        return true
     }
 
     fun citasDelUsuario(): List<Cita> {
