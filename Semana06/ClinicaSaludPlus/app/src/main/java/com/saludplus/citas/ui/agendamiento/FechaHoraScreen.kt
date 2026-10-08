@@ -3,8 +3,7 @@ package com.saludplus.citas.ui.agendamiento
 import androidx.compose.runtime.Composable
 import com.saludplus.citas.ui.components.PantallaEnConstruccion
 
-// TODO: seleccion de dia y LazyVerticalGrid con Repositorio.horariosDisponibles(medicoId, fecha).
-// "Continuar" solo se habilita con dia y hora elegidos.
+// TODO: completar pantalla
 @Composable
 fun FechaHoraScreen(medicoId: Int, onContinuar: (fecha: String, hora: String) -> Unit, onVolver: () -> Unit) {
     PantallaEnConstruccion(

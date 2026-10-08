@@ -3,8 +3,7 @@ package com.saludplus.citas.ui.auth
 import androidx.compose.runtime.Composable
 import com.saludplus.citas.ui.components.PantallaEnConstruccion
 
-// TODO: estados con remember, OutlinedTextField (nombre, correo, telefono, contrasena), validaciones
-// y Repositorio.registrarUsuario(...). Al registrar con exito llamar a onRegistroExitoso().
+// TODO: completar pantalla
 @Composable
 fun RegistroScreen(onRegistroExitoso: () -> Unit, onVerTerminos: () -> Unit, onVolver: () -> Unit) {
     PantallaEnConstruccion(

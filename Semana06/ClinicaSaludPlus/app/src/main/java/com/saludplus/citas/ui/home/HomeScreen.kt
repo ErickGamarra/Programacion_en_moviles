@@ -4,8 +4,7 @@ import androidx.compose.runtime.Composable
 import com.saludplus.citas.navigation.Rutas
 import com.saludplus.citas.ui.components.PantallaEnConstruccion
 
-// TODO: Scaffold con NavigationBar (Inicio, Citas, Resultados, Perfil), saludo con el nombre del
-// usuario actual y LazyRow de Repositorio.especialidadesDestacadas() (onEspecialidadClick(id)).
+// TODO: completar pantalla
 @Composable
 fun HomeScreen(onAgendarCita: () -> Unit, onEspecialidadClick: (Int) -> Unit, onNotificaciones: () -> Unit, onNavegarBarra: (String) -> Unit) {
     PantallaEnConstruccion(

@@ -3,7 +3,7 @@ package com.saludplus.citas.ui.agendamiento
 import androidx.compose.runtime.Composable
 import com.saludplus.citas.ui.components.PantallaEnConstruccion
 
-// TODO: LazyColumn con Repositorio.buscarMedicos(especialidadId, consulta) (filter + sortedByDescending).
+// TODO: completar pantalla
 @Composable
 fun MedicosScreen(especialidadId: Int, onMedicoClick: (Int) -> Unit, onVolver: () -> Unit) {
     PantallaEnConstruccion(

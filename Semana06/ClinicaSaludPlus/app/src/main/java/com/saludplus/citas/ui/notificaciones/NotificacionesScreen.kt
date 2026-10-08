@@ -3,7 +3,7 @@ package com.saludplus.citas.ui.notificaciones
 import androidx.compose.runtime.Composable
 import com.saludplus.citas.ui.components.PantallaEnConstruccion
 
-// TODO (reto extra): recordatorios generados con map sobre Repositorio.citasDelUsuario().
+// TODO: completar pantalla
 @Composable
 fun NotificacionesScreen(onVolver: () -> Unit) {
     PantallaEnConstruccion(

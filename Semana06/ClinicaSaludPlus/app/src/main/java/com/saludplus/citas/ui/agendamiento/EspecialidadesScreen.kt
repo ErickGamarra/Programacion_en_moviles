@@ -3,7 +3,7 @@ package com.saludplus.citas.ui.agendamiento
 import androidx.compose.runtime.Composable
 import com.saludplus.citas.ui.components.PantallaEnConstruccion
 
-// TODO: campo de busqueda en tiempo real + LazyColumn con Repositorio.buscarEspecialidades(consulta).
+// TODO: completar pantalla
 @Composable
 fun EspecialidadesScreen(onEspecialidadClick: (Int) -> Unit, onVolver: () -> Unit) {
     PantallaEnConstruccion(

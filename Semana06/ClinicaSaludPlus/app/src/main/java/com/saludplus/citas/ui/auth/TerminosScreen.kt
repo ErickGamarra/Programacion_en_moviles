@@ -3,7 +3,7 @@ package com.saludplus.citas.ui.auth
 import androidx.compose.runtime.Composable
 import com.saludplus.citas.ui.components.PantallaEnConstruccion
 
-// TODO (reto extra): texto largo con scroll (verticalScroll) o AlertDialog.
+// TODO: completar pantalla
 @Composable
 fun TerminosScreen(onVolver: () -> Unit) {
     PantallaEnConstruccion(

@@ -4,8 +4,7 @@ import androidx.compose.runtime.Composable
 import com.saludplus.citas.navigation.Rutas
 import com.saludplus.citas.ui.components.PantallaEnConstruccion
 
-// TODO: Scaffold con NavigationBar y LazyColumn con Repositorio.citasDelUsuario();
-// mostrar mensaje si la lista esta vacia.
+// TODO: completar pantalla
 @Composable
 fun MisCitasScreen(onCitaClick: (Int) -> Unit, onNavegarBarra: (String) -> Unit) {
     PantallaEnConstruccion(

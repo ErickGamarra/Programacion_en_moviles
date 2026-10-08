@@ -5,16 +5,9 @@ import com.saludplus.citas.model.Especialidad
 import com.saludplus.citas.model.Medico
 import com.saludplus.citas.model.Usuario
 
-/**
- * Fuente de datos en memoria (sin base de datos). Es un object para que todas las pantallas
- * compartan las mismas colecciones; los datos se pierden al cerrar la app.
- *
- * Completa cada TODO usando operaciones de colecciones (filter, find, any, add, map, sortedBy...).
- * No cambies nombres ni parametros de las funciones.
- */
 object Repositorio {
 
-    // ---------- Colecciones ----------
+    // Colecciones
 
     val usuarios = mutableListOf<Usuario>()
     var usuarioActual: Usuario? = null
@@ -53,96 +46,85 @@ object Repositorio {
         "14:00", "15:00", "16:00", "17:00"
     )
 
-    // ---------- Usuarios y sesion ----------
+    // Usuarios y sesion
 
-    /** Registra un usuario nuevo. Devuelve false si ya existe un usuario con ese correo. */
     fun registrarUsuario(nombre: String, correo: String, telefono: String, contrasena: String): Boolean {
-        // TODO: usuarios.any { ... } para validar que el correo no exista; si no existe, usuarios.add(...)
-        //       y dejar el nuevo usuario como usuarioActual. Devolver true/false segun el resultado.
-        TODO("Implementar registrarUsuario")
+        val correoLimpio = correo.trim()
+        val yaExiste = usuarios.any { it.correo.equals(correoLimpio, ignoreCase = true) }
+        if (yaExiste) return false
+
+        val nuevo = Usuario(
+            id = (usuarios.maxOfOrNull { it.id } ?: 0) + 1,
+            nombre = nombre.trim(),
+            correo = correoLimpio,
+            telefono = telefono.trim(),
+            contrasena = contrasena
+        )
+        usuarios.add(nuevo)
+        usuarioActual = nuevo
+        return true
     }
 
-    /** Inicia sesion si el correo y la contrasena coinciden con un usuario registrado. */
     fun iniciarSesion(correo: String, contrasena: String): Boolean {
-        // TODO: usuarios.find { ... }; si existe, asignarlo a usuarioActual y devolver true.
-        TODO("Implementar iniciarSesion")
+        val usuario = usuarios.find {
+            it.correo.equals(correo.trim(), ignoreCase = true) && it.contrasena == contrasena
+        } ?: return false
+
+        usuarioActual = usuario
+        return true
     }
 
     fun cerrarSesion() {
-        // TODO: dejar usuarioActual en null.
+        usuarioActual = null
     }
 
-    // ---------- Especialidades ----------
+    // Especialidades
 
-    /** Busqueda en tiempo real: devuelve todas las especialidades si consulta esta vacia. */
     fun buscarEspecialidades(consulta: String): List<Especialidad> {
-        // TODO: especialidades.filter { it.nombre.contains(consulta, ignoreCase = true) }
         TODO("Implementar buscarEspecialidades")
     }
 
-    /** Especialidades para el LazyRow de Inicio. */
     fun especialidadesDestacadas(): List<Especialidad> {
-        // TODO: especialidades.filter { it.destacada }.take(...)
         TODO("Implementar especialidadesDestacadas")
     }
 
     fun obtenerEspecialidad(id: Int): Especialidad? {
-        // TODO: especialidades.find { it.id == id }
         TODO("Implementar obtenerEspecialidad")
     }
 
-    // ---------- Medicos ----------
+    // Medicos
 
     fun obtenerMedico(id: Int): Medico? {
-        // TODO: medicos.find { it.id == id }
         TODO("Implementar obtenerMedico")
     }
 
-    /** Medicos de una especialidad, ordenados de mayor a menor calificacion. */
     fun medicosPorEspecialidad(especialidadId: Int): List<Medico> {
-        // TODO: medicos.filter { ... }.sortedByDescending { it.calificacion }
         TODO("Implementar medicosPorEspecialidad")
     }
 
-    /** Igual que medicosPorEspecialidad pero filtrando ademas por el nombre del medico. */
     fun buscarMedicos(especialidadId: Int, consulta: String): List<Medico> {
-        // TODO: filtrar por especialidad y por nombre (contains, ignoreCase) y ordenar por calificacion.
         TODO("Implementar buscarMedicos")
     }
 
-    // ---------- Citas ----------
+    // Citas
 
-    /** Horarios libres de un medico en una fecha: horariosBase menos los ya reservados. */
     fun horariosDisponibles(medicoId: Int, fecha: String): List<String> {
-        // TODO: citas.filter { medico y fecha }.map { it.hora } -> reservados;
-        //       horariosBase.filter { it !in reservados }
         TODO("Implementar horariosDisponibles")
     }
 
     fun obtenerCita(id: Int): Cita? {
-        // TODO: citas.find { it.id == id }
         TODO("Implementar obtenerCita")
     }
 
-    /**
-     * Agenda una cita para el usuarioActual. Devuelve false si no hay sesion o si el horario
-     * ya esta reservado para ese medico y fecha.
-     */
     fun agendarCita(medicoId: Int, fecha: String, hora: String): Boolean {
-        // TODO: validar usuarioActual y que el horario este libre (citas.any { ... });
-        //       crear la Cita (id nuevo, especialidadId tomado del medico) y citas.add(...)
         TODO("Implementar agendarCita")
     }
 
-    /** Citas del usuarioActual ordenadas por fecha y hora. */
     fun citasDelUsuario(): List<Cita> {
-        // TODO: citas.filter { it.usuarioId == usuarioActual?.id }.sortedWith(compareBy({ it.fecha }, { it.hora }))
         TODO("Implementar citasDelUsuario")
     }
 
-    /** Reto extra (pantalla Detalle de cita). */
     fun cancelarCita(citaId: Int): Boolean {
-        // TODO: citas.removeIf { it.id == citaId } (o removeAll { ... })
         TODO("Implementar cancelarCita")
     }
 }

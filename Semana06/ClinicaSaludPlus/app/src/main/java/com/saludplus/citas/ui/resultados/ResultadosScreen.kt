@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import com.saludplus.citas.navigation.Rutas
 import com.saludplus.citas.ui.components.PantallaEnConstruccion
 
-// TODO (reto extra): modelo propio (ej. ResultadoExamen) y lista fija de resultados.
+// TODO: completar pantalla
 @Composable
 fun ResultadosScreen(onNavegarBarra: (String) -> Unit) {
     PantallaEnConstruccion(
