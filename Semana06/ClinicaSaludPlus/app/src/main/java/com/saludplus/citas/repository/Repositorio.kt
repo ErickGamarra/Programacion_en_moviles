@@ -128,7 +128,7 @@ object Repositorio {
     }
 
     fun obtenerCita(id: Int): Cita? {
-        TODO("Implementar obtenerCita")
+        return citas.find { it.id == id }
     }
 
     fun agendarCita(medicoId: Int, fecha: String, hora: String): Boolean {
@@ -157,6 +157,6 @@ object Repositorio {
     }
 
     fun cancelarCita(citaId: Int): Boolean {
-        TODO("Implementar cancelarCita")
+        return citas.removeIf { it.id == citaId }
     }
 }
