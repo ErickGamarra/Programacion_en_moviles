@@ -6,6 +6,7 @@ import com.gamarra.huellitasvet.data.local.entity.Cita
 import com.gamarra.huellitasvet.data.local.entity.Mascota
 import com.gamarra.huellitasvet.data.local.entity.Servicio
 import com.gamarra.huellitasvet.data.local.entity.Usuario
+import com.gamarra.huellitasvet.data.local.entity.Vacuna
 import com.gamarra.huellitasvet.data.local.relation.CitaConDetalle
 import com.gamarra.huellitasvet.data.local.relation.MascotaConDueno
 import com.gamarra.huellitasvet.model.ConteoServicio
@@ -18,6 +19,7 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
     private val servicioDao = db.servicioDao()
     private val mascotaDao = db.mascotaDao()
     private val citaDao = db.citaDao()
+    private val vacunaDao = db.vacunaDao()
 
     override suspend fun login(correo: String, clave: String): Usuario? =
         usuarioDao.login(correo, clave)
@@ -54,6 +56,14 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
     override suspend fun eliminarMascota(m: Mascota) = mascotaDao.eliminar(m)
 
     override suspend fun mascotaTieneCitas(id: Int): Boolean = mascotaDao.contarCitas(id) > 0
+
+    override fun observarVacunas(mascotaId: Int): Flow<List<Vacuna>> = vacunaDao.observarPorMascota(mascotaId)
+
+    override suspend fun guardarVacuna(v: Vacuna) {
+        vacunaDao.insertar(v)
+    }
+
+    override suspend fun eliminarVacuna(v: Vacuna) = vacunaDao.eliminar(v)
 
     override fun observarHorasOcupadas(fecha: String): Flow<List<String>> =
         citaDao.observarHorasOcupadas(fecha)

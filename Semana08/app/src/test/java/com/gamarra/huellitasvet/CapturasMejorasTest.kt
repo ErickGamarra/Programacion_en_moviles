@@ -2,11 +2,14 @@ package com.gamarra.huellitasvet
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.os.Looper
+import android.view.View
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.test.core.app.ApplicationProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -14,6 +17,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
@@ -58,6 +62,27 @@ class CapturasMejorasTest {
         esperar("Mis citas")
         esperar("11:00", parcial = true)
         capturar("B3_cita_reprogramada")
+
+        regla.onNodeWithText("Inicio").performClick()
+        esperar("Luna")
+        regla.onNodeWithText("Luna").performClick()
+        esperar("Vacunas")
+        regla.onNodeWithText("Vacunas").performClick()
+        esperar("Antirrábica")
+        capturar("C1_carnet_vacunas")
+        regla.onNodeWithText("Registrar vacuna").performClick()
+        esperar("Guardar")
+        regla.onNodeWithText("Vacuna").performTextInput("Le")
+        regla.onNodeWithText("Fecha aplicada (aaaa-mm-dd)").performTextReplacement(LocalDate.now().plusDays(5).toString())
+        regla.onNodeWithText("Guardar").performClick()
+        esperar("Mínimo 3 caracteres")
+        capturar("C2_vacuna_validaciones")
+        regla.onNodeWithText("Vacuna").performTextReplacement("Leucemia felina")
+        regla.onNodeWithText("Fecha aplicada (aaaa-mm-dd)").performTextReplacement(LocalDate.now().toString())
+        regla.onNodeWithText("Próxima dosis (opcional)").performTextInput(LocalDate.now().plusYears(1).toString())
+        regla.onNodeWithText("Guardar").performClick()
+        esperar("Leucemia felina")
+        capturar("C3_vacuna_registrada")
     }
 
     private fun esperarDatos() = runBlocking {
@@ -85,12 +110,42 @@ class CapturasMejorasTest {
         regla.waitForIdle()
     }
 
+    private fun avanzar() {
+        repeat(10) {
+            regla.mainClock.advanceTimeBy(100)
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+            Thread.sleep(50)
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun ventanas(): List<View> {
+        val clase = Class.forName("android.view.WindowManagerGlobal")
+        val global = clase.getMethod("getInstance").invoke(null)
+        val campo = clase.getDeclaredField("mViews").apply { isAccessible = true }
+        return (campo.get(global) as List<View>).filter { it.isShown }
+    }
+
     private fun capturar(nombre: String) {
-        regla.waitForIdle()
-        regla.mainClock.advanceTimeBy(500)
+        if (regla.mainClock.autoAdvance) {
+            regla.waitForIdle()
+            regla.mainClock.advanceTimeBy(500)
+        } else {
+            avanzar()
+        }
         val vista = regla.activity.window.decorView
         val imagen = Bitmap.createBitmap(vista.width, vista.height, Bitmap.Config.ARGB_8888)
-        regla.runOnUiThread { vista.draw(Canvas(imagen)) }
+        regla.runOnUiThread {
+            val lienzo = Canvas(imagen)
+            ventanas().forEachIndexed { i, v ->
+                if (i > 0) lienzo.drawColor(0x99000000.toInt())
+                val pos = IntArray(2).also { v.getLocationOnScreen(it) }
+                lienzo.save()
+                lienzo.translate(pos[0].toFloat(), pos[1].toFloat())
+                v.draw(lienzo)
+                lienzo.restore()
+            }
+        }
         File(carpeta, "$nombre.png").outputStream().use { imagen.compress(Bitmap.CompressFormat.PNG, 100, it) }
     }
 }

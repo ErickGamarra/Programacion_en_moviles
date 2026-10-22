@@ -3,6 +3,7 @@ package com.gamarra.huellitasvet.data.repository
 import com.gamarra.huellitasvet.data.local.entity.Mascota
 import com.gamarra.huellitasvet.data.local.entity.Servicio
 import com.gamarra.huellitasvet.data.local.entity.Usuario
+import com.gamarra.huellitasvet.data.local.entity.Vacuna
 import com.gamarra.huellitasvet.data.local.relation.CitaConDetalle
 import com.gamarra.huellitasvet.data.local.relation.MascotaConDueno
 import com.gamarra.huellitasvet.model.ConteoServicio
@@ -27,6 +28,10 @@ interface VetRepository {
     suspend fun guardarMascota(m: Mascota)
     suspend fun eliminarMascota(m: Mascota)
     suspend fun mascotaTieneCitas(id: Int): Boolean
+
+    fun observarVacunas(mascotaId: Int): Flow<List<Vacuna>>
+    suspend fun guardarVacuna(v: Vacuna)
+    suspend fun eliminarVacuna(v: Vacuna)
 
     fun observarHorasOcupadas(fecha: String): Flow<List<String>>
     suspend fun crearCita(mascotaId: Int, servicioId: Int, fecha: String, hora: String, nota: String): Long

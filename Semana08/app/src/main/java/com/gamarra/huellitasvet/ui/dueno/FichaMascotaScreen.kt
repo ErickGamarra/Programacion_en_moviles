@@ -49,11 +49,13 @@ import com.gamarra.huellitasvet.ui.components.nombreEspecie
 import com.gamarra.huellitasvet.ui.components.nombreSexo
 import com.gamarra.huellitasvet.ui.components.pesoTexto
 import com.gamarra.huellitasvet.viewmodel.MascotaViewModel
+import com.gamarra.huellitasvet.viewmodel.VacunasViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FichaMascotaScreen(
     vm: MascotaViewModel,
+    vacunasVm: VacunasViewModel,
     mascotaId: Int,
     onVolver: () -> Unit,
     onEditar: (() -> Unit)? = null,
@@ -62,6 +64,7 @@ fun FichaMascotaScreen(
     val mascota by remember(mascotaId) { vm.mascota(mascotaId) }.collectAsState()
     val historial by remember(mascotaId) { vm.historial(mascotaId) }.collectAsState()
     val pesos by remember(mascotaId) { vm.pesos(mascotaId) }.collectAsState()
+    val vacunas by remember(mascotaId) { vacunasVm.vacunas(mascotaId) }.collectAsState()
     var pestana by remember { mutableIntStateOf(0) }
 
     Scaffold(
@@ -94,10 +97,13 @@ fun FichaMascotaScreen(
                 TabRow(selectedTabIndex = pestana, containerColor = MaterialTheme.colorScheme.background) {
                     Tab(selected = pestana == 0, onClick = { pestana = 0 }, text = { Text("Datos") })
                     Tab(selected = pestana == 1, onClick = { pestana = 1 }, text = { Text("Historial clínico") })
+                    Tab(selected = pestana == 2, onClick = { pestana = 2 }, text = { Text("Vacunas") })
                 }
             }
             if (pestana == 0) {
                 item { Datos(m) }
+            } else if (pestana == 2) {
+                item { CarnetVacunas(vacunasVm, m.id, vacunas) }
             } else if (historial.isEmpty()) {
                 item { Text("Aún no tiene atenciones", color = MaterialTheme.colorScheme.onSurfaceVariant) }
             } else {

@@ -58,6 +58,7 @@ import com.gamarra.huellitasvet.viewmodel.PedirCitaViewModel
 import com.gamarra.huellitasvet.viewmodel.ReprogramarCitaViewModel
 import com.gamarra.huellitasvet.viewmodel.ServiciosViewModel
 import com.gamarra.huellitasvet.viewmodel.SesionViewModel
+import com.gamarra.huellitasvet.viewmodel.VacunasViewModel
 import com.gamarra.huellitasvet.viewmodel.VetViewModelFactory
 
 private data class ItemBarra(val ruta: String, val texto: String, val icono: ImageVector)
@@ -91,6 +92,7 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
     val pacientesVm: PacientesViewModel = viewModel(factory = factory)
     val serviciosVm: ServiciosViewModel = viewModel(factory = factory)
     val reprogramarVm: ReprogramarCitaViewModel = viewModel(factory = factory)
+    val vacunasVm: VacunasViewModel = viewModel(factory = factory)
 
     LaunchedEffect(usuario) {
         usuario?.let {
@@ -154,6 +156,7 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
             val id = entrada.arguments?.getInt("id") ?: 0
             FichaMascotaScreen(
                 vm = mascotaVm,
+                vacunasVm = vacunasVm,
                 mascotaId = id,
                 onVolver = { nav.popBackStack() },
                 onEditar = { nav.navigate(Rutas.formulario(id)) },
@@ -225,7 +228,7 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
         }
         composable(Rutas.PACIENTE, arguments = listOf(navArgument("id") { type = NavType.IntType })) { entrada ->
             val id = entrada.arguments?.getInt("id") ?: 0
-            FichaMascotaScreen(vm = mascotaVm, mascotaId = id, onVolver = { nav.popBackStack() })
+            FichaMascotaScreen(vm = mascotaVm, vacunasVm = vacunasVm, mascotaId = id, onVolver = { nav.popBackStack() })
         }
         composable(Rutas.SERVICIOS) {
             Scaffold(bottomBar = { BarraInferior(nav, itemsVet) }) { padding ->

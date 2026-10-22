@@ -4,6 +4,7 @@ import com.gamarra.huellitasvet.data.local.entity.Cita
 import com.gamarra.huellitasvet.data.local.entity.Mascota
 import com.gamarra.huellitasvet.data.local.entity.Servicio
 import com.gamarra.huellitasvet.data.local.entity.Usuario
+import com.gamarra.huellitasvet.data.local.entity.Vacuna
 import com.gamarra.huellitasvet.model.Especie
 import com.gamarra.huellitasvet.model.EstadoCita
 import com.gamarra.huellitasvet.model.Rol
@@ -64,6 +65,16 @@ object DatosIniciales {
                 cita(4, 1, 60.0, 0, "12:30", EstadoCita.PENDIENTE),
                 cita(2, 1, 60.0, 2, "16:00", EstadoCita.PENDIENTE),
                 cita(4, 2, 45.0, 4, "10:00", EstadoCita.PENDIENTE)
+            )
+        )
+
+        db.vacunaDao().insertarTodos(
+            listOf(
+                Vacuna(mascotaId = 1, nombre = "Triple felina", fecha = dia(-10), proximaDosis = dia(355)),
+                Vacuna(mascotaId = 1, nombre = "Antirrábica", fecha = dia(-340), proximaDosis = dia(25)),
+                Vacuna(mascotaId = 2, nombre = "Séxtuple canina", fecha = dia(-30), proximaDosis = dia(335)),
+                Vacuna(mascotaId = 2, nombre = "Antirrábica", fecha = dia(-400), proximaDosis = dia(-35)),
+                Vacuna(mascotaId = 3, nombre = "Séxtuple canina", fecha = dia(-90), proximaDosis = dia(275))
             )
         )
     }
