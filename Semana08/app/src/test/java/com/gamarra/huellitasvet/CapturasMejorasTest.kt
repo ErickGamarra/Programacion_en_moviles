@@ -41,6 +41,23 @@ class CapturasMejorasTest {
         regla.onNodeWithText("Historial clínico").performClick()
         esperar("Evolución del peso (kg)")
         capturar("A_grafico_peso")
+
+        atras()
+        esperar("Citas")
+        regla.onNodeWithText("Citas").performClick()
+        esperar("Reprogramar")
+        capturar("B1_mis_citas_reprogramar")
+        regla.onAllNodesWithText("Reprogramar")[0].performClick()
+        esperar("Cita actual")
+        regla.onNodeWithText(LocalDate.now().plusDays(3).dayOfMonth.toString()).performClick()
+        regla.waitForIdle()
+        regla.onNodeWithText("11:00").performClick()
+        esperar("Nuevo horario:", parcial = true)
+        capturar("B2_reprogramar_cita")
+        regla.onNodeWithText("Confirmar cambio").performClick()
+        esperar("Mis citas")
+        esperar("11:00", parcial = true)
+        capturar("B3_cita_reprogramada")
     }
 
     private fun esperarDatos() = runBlocking {

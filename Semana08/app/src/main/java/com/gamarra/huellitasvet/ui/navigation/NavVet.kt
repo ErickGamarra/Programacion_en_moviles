@@ -38,6 +38,7 @@ import com.gamarra.huellitasvet.ui.dueno.MascotasScreen
 import com.gamarra.huellitasvet.ui.dueno.MisCitasScreen
 import com.gamarra.huellitasvet.ui.dueno.PedirCitaScreen
 import com.gamarra.huellitasvet.ui.dueno.PerfilScreen
+import com.gamarra.huellitasvet.ui.dueno.ReprogramarCitaScreen
 import com.gamarra.huellitasvet.ui.dueno.SplashScreen
 import com.gamarra.huellitasvet.ui.veterinario.AgendaScreen
 import com.gamarra.huellitasvet.ui.veterinario.AjustesScreen
@@ -54,6 +55,7 @@ import com.gamarra.huellitasvet.viewmodel.MisCitasViewModel
 import com.gamarra.huellitasvet.viewmodel.PacientesViewModel
 import com.gamarra.huellitasvet.viewmodel.PanelViewModel
 import com.gamarra.huellitasvet.viewmodel.PedirCitaViewModel
+import com.gamarra.huellitasvet.viewmodel.ReprogramarCitaViewModel
 import com.gamarra.huellitasvet.viewmodel.ServiciosViewModel
 import com.gamarra.huellitasvet.viewmodel.SesionViewModel
 import com.gamarra.huellitasvet.viewmodel.VetViewModelFactory
@@ -88,6 +90,7 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
     val atenderVm: AtenderCitaViewModel = viewModel(factory = factory)
     val pacientesVm: PacientesViewModel = viewModel(factory = factory)
     val serviciosVm: ServiciosViewModel = viewModel(factory = factory)
+    val reprogramarVm: ReprogramarCitaViewModel = viewModel(factory = factory)
 
     LaunchedEffect(usuario) {
         usuario?.let {
@@ -128,7 +131,7 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
         }
         composable(Rutas.CITAS) {
             Scaffold(bottomBar = { BarraInferior(nav, itemsDueno) }) { padding ->
-                MisCitasScreen(misCitasVm, pedirCita, Modifier.padding(padding))
+                MisCitasScreen(misCitasVm, pedirCita, onReprogramar = { nav.navigate(Rutas.reprogramar(it)) }, modifier = Modifier.padding(padding))
             }
         }
         composable(Rutas.PERFIL) {
@@ -186,6 +189,10 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
                     }
                 }
             )
+        }
+        composable(Rutas.REPROGRAMAR, arguments = listOf(navArgument("citaId") { type = NavType.IntType })) { entrada ->
+            val citaId = entrada.arguments?.getInt("citaId") ?: 0
+            ReprogramarCitaScreen(reprogramarVm, citaId, onVolver = { nav.popBackStack() })
         }
         composable(Rutas.PANEL) {
             Scaffold(bottomBar = { BarraInferior(nav, itemsVet) }) { padding ->

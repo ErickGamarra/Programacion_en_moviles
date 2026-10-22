@@ -30,6 +30,9 @@ interface CitaDao {
     )
     suspend fun registrarAtencion(id: Int, diagnostico: String, tratamiento: String, peso: Double)
 
+    @Query("UPDATE citas SET fecha = :fecha, hora = :hora, estado = 'PENDIENTE' WHERE id = :id")
+    suspend fun reprogramar(id: Int, fecha: String, hora: String)
+
     @Query("SELECT COUNT(*) FROM citas WHERE servicioId = :servicioId")
     suspend fun contarPorServicioId(servicioId: Int): Int
 

@@ -44,7 +44,7 @@ import com.gamarra.huellitasvet.ui.components.fechaLarga
 import com.gamarra.huellitasvet.viewmodel.MisCitasViewModel
 
 @Composable
-fun MisCitasScreen(vm: MisCitasViewModel, onPedirCita: () -> Unit, modifier: Modifier = Modifier) {
+fun MisCitasScreen(vm: MisCitasViewModel, onPedirCita: () -> Unit, onReprogramar: (Int) -> Unit, modifier: Modifier = Modifier) {
     val proximas by vm.proximas.collectAsState()
     val historial by vm.historial.collectAsState()
     val mensaje by vm.mensaje.collectAsState()
@@ -76,7 +76,7 @@ fun MisCitasScreen(vm: MisCitasViewModel, onPedirCita: () -> Unit, modifier: Mod
                     ) {
                         Icon(Icons.Outlined.Info, contentDescription = null, tint = colores.primary, modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(8.dp))
-                        Text("Puedes cancelar hasta 2 horas antes", color = colores.onPrimaryContainer, fontSize = 14.sp)
+                        Text("Puedes cancelar o reprogramar hasta 2 horas antes", color = colores.onPrimaryContainer, fontSize = 14.sp)
                     }
                 }
             }
@@ -93,8 +93,9 @@ fun MisCitasScreen(vm: MisCitasViewModel, onPedirCita: () -> Unit, modifier: Mod
             items(lista, key = { it.cita.id }) { c ->
                 CitaCard(c) {
                     if (pestana == 0 && vm.puedeCancelar(c)) {
-                        TextButton(onClick = { porCancelar = c }, modifier = Modifier.align(Alignment.End)) {
-                            Text("Cancelar", color = colores.error)
+                        Row(Modifier.align(Alignment.End)) {
+                            TextButton(onClick = { onReprogramar(c.cita.id) }) { Text("Reprogramar") }
+                            TextButton(onClick = { porCancelar = c }) { Text("Cancelar", color = colores.error) }
                         }
                     }
                 }

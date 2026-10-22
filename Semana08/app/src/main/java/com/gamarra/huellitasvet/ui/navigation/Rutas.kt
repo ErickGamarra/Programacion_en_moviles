@@ -11,6 +11,7 @@ object Rutas {
     const val PERFIL = "perfil"
     const val FICHA = "ficha/{id}"
     const val FORMULARIO = "formulario?id={id}"
+    const val REPROGRAMAR = "reprogramar/{citaId}"
     const val PEDIR_CITA = "pedirCita?mascotaId={mascotaId}"
     const val PANEL = "panel"
     const val AGENDA = "agenda"
@@ -26,6 +27,7 @@ object Rutas {
     fun formulario(id: Int? = null) = if (id == null) "formulario" else "formulario?id=$id"
     fun paciente(id: Int) = "paciente/$id"
     fun atender(citaId: Int) = "atender/$citaId"
+    fun reprogramar(citaId: Int) = "reprogramar/$citaId"
     fun servicio(id: Int? = null) = if (id == null) "servicio" else "servicio?id=$id"
     fun pedirCita(mascotaId: Int? = null) = if (mascotaId == null) "pedirCita" else "pedirCita?mascotaId=$mascotaId"
 }
