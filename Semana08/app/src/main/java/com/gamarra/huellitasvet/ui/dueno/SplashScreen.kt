@@ -23,13 +23,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gamarra.huellitasvet.model.Rol
 import com.gamarra.huellitasvet.viewmodel.SesionViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 
 @Composable
 fun SplashScreen(vm: SesionViewModel, onDestino: (Rol?) -> Unit) {
     LaunchedEffect(Unit) {
         delay(900)
-        onDestino(vm.destinoInicial())
+        val destino = vm.destinoInicial()
+        withContext(Dispatchers.Main) { onDestino(destino) }
     }
     Column(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
