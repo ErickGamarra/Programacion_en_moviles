@@ -9,6 +9,8 @@ class VetViewModelFactory(private val app: VetApp) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T = when {
         modelClass.isAssignableFrom(SesionViewModel::class.java) ->
             SesionViewModel(app.repository, app.preferencias) as T
+        modelClass.isAssignableFrom(InicioViewModel::class.java) ->
+            InicioViewModel(app.repository) as T
         else -> throw IllegalArgumentException("ViewModel desconocido")
     }
 }

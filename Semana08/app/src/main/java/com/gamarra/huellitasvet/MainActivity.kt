@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
             val oscuro by sesion.modoOscuro.collectAsState()
             val usuario by sesion.usuarioActual.collectAsState()
             VetTheme(rol = usuario?.let { Rol.valueOf(it.rol) }, darkTheme = oscuro) {
-                NavVet(sesion)
+                NavVet(sesion, factory)
             }
         }
     }
