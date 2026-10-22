@@ -29,10 +29,12 @@ import com.gamarra.huellitasvet.ui.dueno.FormularioMascotaScreen
 import com.gamarra.huellitasvet.ui.dueno.InicioScreen
 import com.gamarra.huellitasvet.ui.dueno.LoginScreen
 import com.gamarra.huellitasvet.ui.dueno.MascotasScreen
+import com.gamarra.huellitasvet.ui.dueno.PedirCitaScreen
 import com.gamarra.huellitasvet.ui.dueno.SplashScreen
 import com.gamarra.huellitasvet.ui.veterinario.PanelScreen
 import com.gamarra.huellitasvet.viewmodel.InicioViewModel
 import com.gamarra.huellitasvet.viewmodel.MascotaViewModel
+import com.gamarra.huellitasvet.viewmodel.PedirCitaViewModel
 import com.gamarra.huellitasvet.viewmodel.SesionViewModel
 import com.gamarra.huellitasvet.viewmodel.VetViewModelFactory
 
@@ -49,6 +51,7 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
     val usuario by sesion.usuarioActual.collectAsState()
     val inicioVm: InicioViewModel = viewModel(factory = factory)
     val mascotaVm: MascotaViewModel = viewModel(factory = factory)
+    val pedirCitaVm: PedirCitaViewModel = viewModel(factory = factory)
 
     LaunchedEffect(usuario) { usuario?.let { inicioVm.cargar(it.id) } }
 
@@ -63,8 +66,7 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
 
     val verMascota: (Int) -> Unit = { nav.navigate(Rutas.ficha(it)) }
     val agregarMascota: () -> Unit = { nav.navigate(Rutas.formulario()) }
-    // TODO Paso 9: navegar a pedir cita
-    val pedirCita: () -> Unit = {}
+    val pedirCita: () -> Unit = { nav.navigate(Rutas.pedirCita()) }
 
     NavHost(navController = nav, startDestination = Rutas.SPLASH) {
         composable(Rutas.SPLASH) { SplashScreen(sesion) { irAPrincipal(it, Rutas.SPLASH) } }
@@ -86,7 +88,7 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
                 mascotaId = id,
                 onVolver = { nav.popBackStack() },
                 onEditar = { nav.navigate(Rutas.formulario(id)) },
-                onPedirCita = pedirCita
+                onPedirCita = { nav.navigate(Rutas.pedirCita(id)) }
             )
         }
         composable(
@@ -101,6 +103,15 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
                 onVolver = { nav.popBackStack() },
                 onEliminada = { nav.popBackStack(Rutas.MASCOTAS, inclusive = false) || nav.popBackStack(Rutas.INICIO, inclusive = false) }
             )
+        }
+        composable(
+            Rutas.PEDIR_CITA,
+            arguments = listOf(navArgument("mascotaId") { type = NavType.IntType; defaultValue = -1 })
+        ) { entrada ->
+            val mascotaId = entrada.arguments?.getInt("mascotaId")?.takeIf { it > 0 }
+            LaunchedEffect(Unit) { pedirCitaVm.iniciar(usuario?.id ?: 0, mascotaId) }
+            // TODO Paso 10: al crear la cita ir a Mis citas
+            PedirCitaScreen(pedirCitaVm, onVolver = { nav.popBackStack() }, onCreada = { nav.popBackStack() })
         }
         composable(Rutas.PANEL) { PanelScreen(sesion) }
     }
