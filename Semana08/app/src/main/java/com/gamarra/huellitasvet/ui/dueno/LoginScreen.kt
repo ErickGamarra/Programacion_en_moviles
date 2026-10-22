@@ -36,8 +36,8 @@ import com.gamarra.huellitasvet.ui.theme.VetTheme
 import com.gamarra.huellitasvet.viewmodel.SesionViewModel
 
 @Composable
-fun LoginScreen(vm: SesionViewModel, onLogin: (Rol) -> Unit) {
-    var rol by remember { mutableStateOf(Rol.CLIENTE) }
+fun LoginScreen(vm: SesionViewModel, rolInicial: Rol = Rol.CLIENTE, onLogin: (Rol) -> Unit) {
+    var rol by remember { mutableStateOf(rolInicial) }
     var correo by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
     val error by vm.error.collectAsState()

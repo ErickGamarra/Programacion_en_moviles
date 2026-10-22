@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -39,8 +40,11 @@ import com.gamarra.huellitasvet.ui.dueno.PedirCitaScreen
 import com.gamarra.huellitasvet.ui.dueno.PerfilScreen
 import com.gamarra.huellitasvet.ui.dueno.SplashScreen
 import com.gamarra.huellitasvet.ui.veterinario.AgendaScreen
+import com.gamarra.huellitasvet.ui.veterinario.AjustesScreen
 import com.gamarra.huellitasvet.ui.veterinario.AtenderCitaScreen
 import com.gamarra.huellitasvet.ui.veterinario.PacientesScreen
+import com.gamarra.huellitasvet.ui.veterinario.ServiciosScreen
+import com.gamarra.huellitasvet.ui.veterinario.FormularioServicioScreen
 import com.gamarra.huellitasvet.ui.veterinario.PanelScreen
 import com.gamarra.huellitasvet.viewmodel.AgendaViewModel
 import com.gamarra.huellitasvet.viewmodel.AtenderCitaViewModel
@@ -50,6 +54,7 @@ import com.gamarra.huellitasvet.viewmodel.MisCitasViewModel
 import com.gamarra.huellitasvet.viewmodel.PacientesViewModel
 import com.gamarra.huellitasvet.viewmodel.PanelViewModel
 import com.gamarra.huellitasvet.viewmodel.PedirCitaViewModel
+import com.gamarra.huellitasvet.viewmodel.ServiciosViewModel
 import com.gamarra.huellitasvet.viewmodel.SesionViewModel
 import com.gamarra.huellitasvet.viewmodel.VetViewModelFactory
 
@@ -65,7 +70,9 @@ private val itemsDueno = listOf(
 private val itemsVet = listOf(
     ItemBarra(Rutas.PANEL, "Panel", Icons.Filled.Dashboard),
     ItemBarra(Rutas.AGENDA, "Agenda", Icons.Filled.EventNote),
-    ItemBarra(Rutas.PACIENTES, "Pacientes", Icons.Filled.MedicalServices)
+    ItemBarra(Rutas.PACIENTES, "Pacientes", Icons.Filled.Pets),
+    ItemBarra(Rutas.SERVICIOS, "Servicios", Icons.Filled.MedicalServices),
+    ItemBarra(Rutas.AJUSTES, "Ajustes", Icons.Filled.Settings)
 )
 
 @Composable
@@ -80,6 +87,7 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
     val agendaVm: AgendaViewModel = viewModel(factory = factory)
     val atenderVm: AtenderCitaViewModel = viewModel(factory = factory)
     val pacientesVm: PacientesViewModel = viewModel(factory = factory)
+    val serviciosVm: ServiciosViewModel = viewModel(factory = factory)
 
     LaunchedEffect(usuario) {
         usuario?.let {
@@ -92,7 +100,7 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
         val destino = when (rol) {
             Rol.CLIENTE -> Rutas.INICIO
             Rol.ADMIN -> Rutas.PANEL
-            null -> Rutas.LOGIN
+            null -> Rutas.login()
         }
         nav.navigate(destino) { popUpTo(desde) { inclusive = true } }
     }
@@ -100,10 +108,14 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
     val verMascota: (Int) -> Unit = { nav.navigate(Rutas.ficha(it)) }
     val agregarMascota: () -> Unit = { nav.navigate(Rutas.formulario()) }
     val pedirCita: () -> Unit = { nav.navigate(Rutas.pedirCita()) }
+    val irALogin: (Rol) -> Unit = { rol -> nav.navigate(Rutas.login(rol)) { popUpTo(nav.graph.id) { inclusive = true } } }
 
     NavHost(navController = nav, startDestination = Rutas.SPLASH) {
         composable(Rutas.SPLASH) { SplashScreen(sesion) { irAPrincipal(it, Rutas.SPLASH) } }
-        composable(Rutas.LOGIN) { LoginScreen(sesion) { irAPrincipal(it, Rutas.LOGIN) } }
+        composable(Rutas.LOGIN, arguments = listOf(navArgument("rol") { defaultValue = Rol.CLIENTE.name })) { entrada ->
+            val rol = Rol.valueOf(entrada.arguments?.getString("rol") ?: Rol.CLIENTE.name)
+            LoginScreen(sesion, rolInicial = rol) { irAPrincipal(it, Rutas.LOGIN) }
+        }
         composable(Rutas.INICIO) {
             Scaffold(bottomBar = { BarraInferior(nav, itemsDueno) }) { padding ->
                 InicioScreen(sesion, inicioVm, verMascota, agregarMascota, pedirCita, Modifier.padding(padding))
@@ -121,9 +133,16 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
         }
         composable(Rutas.PERFIL) {
             Scaffold(bottomBar = { BarraInferior(nav, itemsDueno) }) { padding ->
+                val mascotas by inicioVm.mascotas.collectAsState()
+                val proximas by misCitasVm.proximas.collectAsState()
+                val atenciones by misCitasVm.atenciones.collectAsState()
                 PerfilScreen(
                     sesion,
-                    onCerrarSesion = { nav.navigate(Rutas.LOGIN) { popUpTo(nav.graph.id) { inclusive = true } } },
+                    mascotas = mascotas.size,
+                    proximas = proximas.size,
+                    atenciones = atenciones,
+                    onCambiarPerfil = { irALogin(Rol.ADMIN) },
+                    onCerrarSesion = { irALogin(Rol.CLIENTE) },
                     modifier = Modifier.padding(padding)
                 )
             }
@@ -200,6 +219,33 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
         composable(Rutas.PACIENTE, arguments = listOf(navArgument("id") { type = NavType.IntType })) { entrada ->
             val id = entrada.arguments?.getInt("id") ?: 0
             FichaMascotaScreen(vm = mascotaVm, mascotaId = id, onVolver = { nav.popBackStack() })
+        }
+        composable(Rutas.SERVICIOS) {
+            Scaffold(bottomBar = { BarraInferior(nav, itemsVet) }) { padding ->
+                ServiciosScreen(
+                    serviciosVm,
+                    onEditar = { nav.navigate(Rutas.servicio(it)) },
+                    onNuevo = { nav.navigate(Rutas.servicio()) },
+                    modifier = Modifier.padding(padding)
+                )
+            }
+        }
+        composable(
+            Rutas.SERVICIO,
+            arguments = listOf(navArgument("id") { type = NavType.IntType; defaultValue = -1 })
+        ) { entrada ->
+            val id = entrada.arguments?.getInt("id")?.takeIf { it > 0 }
+            FormularioServicioScreen(serviciosVm, id, onVolver = { nav.popBackStack() })
+        }
+        composable(Rutas.AJUSTES) {
+            Scaffold(bottomBar = { BarraInferior(nav, itemsVet) }) { padding ->
+                AjustesScreen(
+                    sesion,
+                    onCambiarPerfil = { irALogin(Rol.CLIENTE) },
+                    onCerrarSesion = { irALogin(Rol.ADMIN) },
+                    modifier = Modifier.padding(padding)
+                )
+            }
         }
     }
 }

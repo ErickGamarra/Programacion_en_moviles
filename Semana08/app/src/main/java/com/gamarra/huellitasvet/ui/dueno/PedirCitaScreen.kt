@@ -23,10 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ContentCut
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.MedicalServices
-import androidx.compose.material.icons.filled.Vaccines
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,7 +42,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,6 +52,7 @@ import com.gamarra.huellitasvet.ui.components.MascotaAvatar
 import com.gamarra.huellitasvet.ui.components.VetButton
 import com.gamarra.huellitasvet.ui.components.VetTextField
 import com.gamarra.huellitasvet.ui.components.fechaLarga
+import com.gamarra.huellitasvet.ui.components.iconoServicio
 import com.gamarra.huellitasvet.ui.components.precioTexto
 import com.gamarra.huellitasvet.viewmodel.PedirCitaViewModel
 
@@ -71,6 +67,7 @@ fun PedirCitaScreen(vm: PedirCitaViewModel, onVolver: () -> Unit, onCreada: () -
     val hora by vm.hora.collectAsState()
     val ocupadas by vm.horasOcupadas.collectAsState()
     val mensaje by vm.mensaje.collectAsState()
+    val aceptarCitas by vm.aceptarCitas.collectAsState()
     var nota by remember { mutableStateOf("") }
     val colores = MaterialTheme.colorScheme
 
@@ -94,6 +91,17 @@ fun PedirCitaScreen(vm: PedirCitaViewModel, onVolver: () -> Unit, onCreada: () -
                 .padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
+            if (!aceptarCitas) {
+                Text(
+                    "La clínica no está recibiendo citas",
+                    color = colores.onErrorContainer,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(colores.errorContainer, RoundedCornerShape(12.dp))
+                        .padding(14.dp)
+                )
+            }
             Seccion("Mascota")
             LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(mascotas, key = { it.id }) { m ->
@@ -157,7 +165,7 @@ fun PedirCitaScreen(vm: PedirCitaViewModel, onVolver: () -> Unit, onCreada: () -
             VetButton(
                 texto = "Confirmar cita",
                 onClick = { vm.confirmar(nota, onCreada) },
-                habilitado = mascota != null && servicio != null && hora != null
+                habilitado = aceptarCitas && mascota != null && servicio != null && hora != null
             )
             Spacer(Modifier.size(8.dp))
         }
@@ -207,11 +215,4 @@ private fun FilaResumen(etiqueta: String, valor: String?, destacado: Boolean = f
             fontSize = if (destacado) 17.sp else 15.sp
         )
     }
-}
-
-private fun iconoServicio(icono: String): ImageVector = when (icono) {
-    "heart" -> Icons.Filled.Favorite
-    "syringe" -> Icons.Filled.Vaccines
-    "scissors" -> Icons.Filled.ContentCut
-    else -> Icons.Filled.MedicalServices
 }

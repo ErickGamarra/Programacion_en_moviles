@@ -34,6 +34,10 @@ class MisCitasViewModel(private val repo: VetRepository) : ViewModel() {
         .map { lista -> lista.filterNot { esProxima(it) }.sortedByDescending { fechaHora(it) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val atenciones: StateFlow<Int> = citas
+        .map { lista -> lista.count { it.cita.estado == EstadoCita.ATENDIDA.name } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
     private val _mensaje = MutableStateFlow<String?>(null)
     val mensaje: StateFlow<String?> = _mensaje.asStateFlow()
 

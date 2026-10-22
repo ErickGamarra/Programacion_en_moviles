@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gamarra.huellitasvet.data.local.entity.Mascota
 import com.gamarra.huellitasvet.data.local.entity.Servicio
+import com.gamarra.huellitasvet.data.prefs.PreferenciasStore
 import com.gamarra.huellitasvet.data.repository.VetRepository
 import com.gamarra.huellitasvet.model.Horarios
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,7 +22,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class PedirCitaViewModel(private val repo: VetRepository) : ViewModel() {
+class PedirCitaViewModel(private val repo: VetRepository, prefs: PreferenciasStore) : ViewModel() {
     private val duenoId = MutableStateFlow<Int?>(null)
 
     val mascotas: StateFlow<List<Mascota>> = duenoId.filterNotNull()
@@ -30,6 +31,9 @@ class PedirCitaViewModel(private val repo: VetRepository) : ViewModel() {
 
     val servicios: StateFlow<List<Servicio>> = repo.observarServiciosActivos()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val aceptarCitas: StateFlow<Boolean> = prefs.aceptarCitas
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     val fechas: List<LocalDate> get() = (0L..7L).map { LocalDate.now().plusDays(it) }
     val horarios: List<String> = Horarios.delDia
@@ -96,6 +100,10 @@ class PedirCitaViewModel(private val repo: VetRepository) : ViewModel() {
         val s = _servicio.value
         val h = _hora.value
         val f = _fecha.value
+        if (!aceptarCitas.value) {
+            _mensaje.value = "La clínica no está recibiendo citas"
+            return
+        }
         if (m == null || s == null || h == null) {
             _mensaje.value = "Elige mascota, servicio, fecha y hora"
             return
