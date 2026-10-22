@@ -3,6 +3,8 @@ package com.gamarra.huellitasvet.ui.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Pets
@@ -35,10 +37,13 @@ import com.gamarra.huellitasvet.ui.dueno.MisCitasScreen
 import com.gamarra.huellitasvet.ui.dueno.PedirCitaScreen
 import com.gamarra.huellitasvet.ui.dueno.PerfilScreen
 import com.gamarra.huellitasvet.ui.dueno.SplashScreen
+import com.gamarra.huellitasvet.ui.veterinario.AgendaScreen
 import com.gamarra.huellitasvet.ui.veterinario.PanelScreen
+import com.gamarra.huellitasvet.viewmodel.AgendaViewModel
 import com.gamarra.huellitasvet.viewmodel.InicioViewModel
 import com.gamarra.huellitasvet.viewmodel.MascotaViewModel
 import com.gamarra.huellitasvet.viewmodel.MisCitasViewModel
+import com.gamarra.huellitasvet.viewmodel.PanelViewModel
 import com.gamarra.huellitasvet.viewmodel.PedirCitaViewModel
 import com.gamarra.huellitasvet.viewmodel.SesionViewModel
 import com.gamarra.huellitasvet.viewmodel.VetViewModelFactory
@@ -52,6 +57,11 @@ private val itemsDueno = listOf(
     ItemBarra(Rutas.PERFIL, "Perfil", Icons.Filled.Person)
 )
 
+private val itemsVet = listOf(
+    ItemBarra(Rutas.PANEL, "Panel", Icons.Filled.Dashboard),
+    ItemBarra(Rutas.AGENDA, "Agenda", Icons.Filled.EventNote)
+)
+
 @Composable
 fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
     val nav = rememberNavController()
@@ -60,6 +70,8 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
     val mascotaVm: MascotaViewModel = viewModel(factory = factory)
     val pedirCitaVm: PedirCitaViewModel = viewModel(factory = factory)
     val misCitasVm: MisCitasViewModel = viewModel(factory = factory)
+    val panelVm: PanelViewModel = viewModel(factory = factory)
+    val agendaVm: AgendaViewModel = viewModel(factory = factory)
 
     LaunchedEffect(usuario) {
         usuario?.let {
@@ -148,7 +160,27 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
                 }
             )
         }
-        composable(Rutas.PANEL) { PanelScreen(sesion) }
+        composable(Rutas.PANEL) {
+            Scaffold(bottomBar = { BarraInferior(nav, itemsVet) }) { padding ->
+                PanelScreen(
+                    sesion,
+                    panelVm,
+                    onVerPendientes = {
+                        nav.navigate(Rutas.AGENDA) {
+                            popUpTo(Rutas.PANEL) { saveState = true }
+                            launchSingleTop = true
+                        }
+                    },
+                    modifier = Modifier.padding(padding)
+                )
+            }
+        }
+        composable(Rutas.AGENDA) {
+            Scaffold(bottomBar = { BarraInferior(nav, itemsVet) }) { padding ->
+                // TODO Paso 12: abrir la pantalla de atender cita
+                AgendaScreen(agendaVm, onAtender = {}, modifier = Modifier.padding(padding))
+            }
+        }
     }
 }
 

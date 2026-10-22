@@ -17,6 +17,10 @@ class VetViewModelFactory(private val app: VetApp) : ViewModelProvider.Factory {
             PedirCitaViewModel(app.repository) as T
         modelClass.isAssignableFrom(MisCitasViewModel::class.java) ->
             MisCitasViewModel(app.repository) as T
+        modelClass.isAssignableFrom(PanelViewModel::class.java) ->
+            PanelViewModel(app.repository) as T
+        modelClass.isAssignableFrom(AgendaViewModel::class.java) ->
+            AgendaViewModel(app.repository) as T
         else -> throw IllegalArgumentException("ViewModel desconocido")
     }
 }

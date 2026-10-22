@@ -11,6 +11,7 @@ object Rutas {
     const val FORMULARIO = "formulario?id={id}"
     const val PEDIR_CITA = "pedirCita?mascotaId={mascotaId}"
     const val PANEL = "panel"
+    const val AGENDA = "agenda"
 
     fun ficha(id: Int) = "ficha/$id"
     fun formulario(id: Int? = null) = if (id == null) "formulario" else "formulario?id=$id"
