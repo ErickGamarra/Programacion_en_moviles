@@ -10,6 +10,7 @@ import com.gamarra.huellitasvet.data.local.relation.CitaConDetalle
 import com.gamarra.huellitasvet.data.local.relation.MascotaConDueno
 import com.gamarra.huellitasvet.model.ConteoServicio
 import com.gamarra.huellitasvet.model.EstadoCita
+import com.gamarra.huellitasvet.model.PesoRegistrado
 import kotlinx.coroutines.flow.Flow
 
 class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
@@ -89,6 +90,9 @@ class VetRepositoryRoom(private val db: VetDatabase) : VetRepository {
 
     override fun observarHistorial(mascotaId: Int): Flow<List<CitaConDetalle>> =
         citaDao.observarHistorial(mascotaId)
+
+    override fun observarPesos(mascotaId: Int): Flow<List<PesoRegistrado>> =
+        citaDao.observarPesos(mascotaId)
 
     override suspend fun cambiarEstadoCita(id: Int, estado: EstadoCita) =
         citaDao.actualizarEstado(id, estado.name)

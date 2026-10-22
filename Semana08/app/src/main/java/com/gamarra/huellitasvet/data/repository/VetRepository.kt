@@ -7,6 +7,7 @@ import com.gamarra.huellitasvet.data.local.relation.CitaConDetalle
 import com.gamarra.huellitasvet.data.local.relation.MascotaConDueno
 import com.gamarra.huellitasvet.model.ConteoServicio
 import com.gamarra.huellitasvet.model.EstadoCita
+import com.gamarra.huellitasvet.model.PesoRegistrado
 import kotlinx.coroutines.flow.Flow
 
 interface VetRepository {
@@ -33,6 +34,7 @@ interface VetRepository {
     fun observarCitasPorFecha(fecha: String): Flow<List<CitaConDetalle>>
     fun observarCita(id: Int): Flow<CitaConDetalle?>
     fun observarHistorial(mascotaId: Int): Flow<List<CitaConDetalle>>
+    fun observarPesos(mascotaId: Int): Flow<List<PesoRegistrado>>
     suspend fun cambiarEstadoCita(id: Int, estado: EstadoCita)
     suspend fun registrarAtencion(citaId: Int, diagnostico: String, tratamiento: String, peso: Double)
 

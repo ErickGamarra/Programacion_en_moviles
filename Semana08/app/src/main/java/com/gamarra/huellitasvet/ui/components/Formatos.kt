@@ -29,5 +29,8 @@ fun pesoTexto(peso: Double) = "${"%.1f".format(espanol, peso)} kg"
 
 fun precioTexto(precio: Double) = "S/ ${"%.2f".format(espanol, precio)}"
 
+fun fechaDiaMes(fecha: String): String =
+    LocalDate.parse(fecha).format(DateTimeFormatter.ofPattern("d MMM", espanol))
+
 fun fechaLarga(fecha: String): String =
     LocalDate.parse(fecha).format(DateTimeFormatter.ofPattern("d MMM yyyy", espanol))

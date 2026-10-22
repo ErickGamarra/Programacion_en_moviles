@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.gamarra.huellitasvet.data.local.entity.Mascota
 import com.gamarra.huellitasvet.data.local.relation.CitaConDetalle
 import com.gamarra.huellitasvet.data.repository.VetRepository
+import com.gamarra.huellitasvet.model.PesoRegistrado
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,6 +36,9 @@ class MascotaViewModel(private val repo: VetRepository) : ViewModel() {
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     fun historial(mascotaId: Int): StateFlow<List<CitaConDetalle>> = repo.observarHistorial(mascotaId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun pesos(mascotaId: Int): StateFlow<List<PesoRegistrado>> = repo.observarPesos(mascotaId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     suspend fun cargar(id: Int): Mascota? = repo.observarMascota(id).first()

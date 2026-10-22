@@ -7,6 +7,7 @@ import androidx.room.Transaction
 import com.gamarra.huellitasvet.data.local.entity.Cita
 import com.gamarra.huellitasvet.data.local.relation.CitaConDetalle
 import com.gamarra.huellitasvet.model.ConteoServicio
+import com.gamarra.huellitasvet.model.PesoRegistrado
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -59,6 +60,12 @@ interface CitaDao {
             "ORDER BY fecha DESC, hora DESC"
     )
     fun observarHistorial(mascotaId: Int): Flow<List<CitaConDetalle>>
+
+    @Query(
+        "SELECT fecha, pesoRegistrado AS peso FROM citas WHERE mascotaId = :mascotaId " +
+            "AND estado = 'ATENDIDA' AND pesoRegistrado IS NOT NULL ORDER BY fecha, hora"
+    )
+    fun observarPesos(mascotaId: Int): Flow<List<PesoRegistrado>>
 
     @Query("SELECT COUNT(*) FROM citas WHERE fecha = :fecha AND estado != 'CANCELADA'")
     fun contarPorFecha(fecha: String): Flow<Int>

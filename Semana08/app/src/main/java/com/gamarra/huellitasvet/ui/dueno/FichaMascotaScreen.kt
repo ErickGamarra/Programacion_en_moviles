@@ -42,6 +42,9 @@ import com.gamarra.huellitasvet.ui.components.HistorialItem
 import com.gamarra.huellitasvet.ui.components.MascotaAvatar
 import com.gamarra.huellitasvet.ui.components.VetButton
 import com.gamarra.huellitasvet.ui.components.edadTexto
+import com.gamarra.huellitasvet.ui.components.fechaDiaMes
+import com.gamarra.huellitasvet.ui.components.graficos.DatoGrafico
+import com.gamarra.huellitasvet.ui.components.graficos.GraficoLineas
 import com.gamarra.huellitasvet.ui.components.nombreEspecie
 import com.gamarra.huellitasvet.ui.components.nombreSexo
 import com.gamarra.huellitasvet.ui.components.pesoTexto
@@ -58,6 +61,7 @@ fun FichaMascotaScreen(
 ) {
     val mascota by remember(mascotaId) { vm.mascota(mascotaId) }.collectAsState()
     val historial by remember(mascotaId) { vm.historial(mascotaId) }.collectAsState()
+    val pesos by remember(mascotaId) { vm.pesos(mascotaId) }.collectAsState()
     var pestana by remember { mutableIntStateOf(0) }
 
     Scaffold(
@@ -97,6 +101,10 @@ fun FichaMascotaScreen(
             } else if (historial.isEmpty()) {
                 item { Text("Aún no tiene atenciones", color = MaterialTheme.colorScheme.onSurfaceVariant) }
             } else {
+                item {
+                    val color = MaterialTheme.colorScheme.primary
+                    TarjetaPeso(pesos.map { DatoGrafico(fechaDiaMes(it.fecha), it.peso.toFloat(), color) })
+                }
                 itemsIndexed(historial, key = { _, it -> it.cita.id }) { i, atencion ->
                     HistorialItem(atencion, esUltimo = i == historial.lastIndex)
                 }
@@ -144,6 +152,21 @@ private fun Datos(m: Mascota) {
                 }
                 if (i < filas.lastIndex) HorizontalDivider()
             }
+        }
+    }
+}
+
+@Composable
+private fun TarjetaPeso(datos: List<DatoGrafico>) {
+    Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text("Evolución del peso (kg)", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+            GraficoLineas(datos, Modifier.padding(top = 12.dp))
         }
     }
 }
