@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.Icon
@@ -38,11 +39,15 @@ import com.gamarra.huellitasvet.ui.dueno.PedirCitaScreen
 import com.gamarra.huellitasvet.ui.dueno.PerfilScreen
 import com.gamarra.huellitasvet.ui.dueno.SplashScreen
 import com.gamarra.huellitasvet.ui.veterinario.AgendaScreen
+import com.gamarra.huellitasvet.ui.veterinario.AtenderCitaScreen
+import com.gamarra.huellitasvet.ui.veterinario.PacientesScreen
 import com.gamarra.huellitasvet.ui.veterinario.PanelScreen
 import com.gamarra.huellitasvet.viewmodel.AgendaViewModel
+import com.gamarra.huellitasvet.viewmodel.AtenderCitaViewModel
 import com.gamarra.huellitasvet.viewmodel.InicioViewModel
 import com.gamarra.huellitasvet.viewmodel.MascotaViewModel
 import com.gamarra.huellitasvet.viewmodel.MisCitasViewModel
+import com.gamarra.huellitasvet.viewmodel.PacientesViewModel
 import com.gamarra.huellitasvet.viewmodel.PanelViewModel
 import com.gamarra.huellitasvet.viewmodel.PedirCitaViewModel
 import com.gamarra.huellitasvet.viewmodel.SesionViewModel
@@ -59,7 +64,8 @@ private val itemsDueno = listOf(
 
 private val itemsVet = listOf(
     ItemBarra(Rutas.PANEL, "Panel", Icons.Filled.Dashboard),
-    ItemBarra(Rutas.AGENDA, "Agenda", Icons.Filled.EventNote)
+    ItemBarra(Rutas.AGENDA, "Agenda", Icons.Filled.EventNote),
+    ItemBarra(Rutas.PACIENTES, "Pacientes", Icons.Filled.MedicalServices)
 )
 
 @Composable
@@ -72,6 +78,8 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
     val misCitasVm: MisCitasViewModel = viewModel(factory = factory)
     val panelVm: PanelViewModel = viewModel(factory = factory)
     val agendaVm: AgendaViewModel = viewModel(factory = factory)
+    val atenderVm: AtenderCitaViewModel = viewModel(factory = factory)
+    val pacientesVm: PacientesViewModel = viewModel(factory = factory)
 
     LaunchedEffect(usuario) {
         usuario?.let {
@@ -177,9 +185,21 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
         }
         composable(Rutas.AGENDA) {
             Scaffold(bottomBar = { BarraInferior(nav, itemsVet) }) { padding ->
-                // TODO Paso 12: abrir la pantalla de atender cita
-                AgendaScreen(agendaVm, onAtender = {}, modifier = Modifier.padding(padding))
+                AgendaScreen(agendaVm, onAtender = { nav.navigate(Rutas.atender(it)) }, modifier = Modifier.padding(padding))
             }
+        }
+        composable(Rutas.ATENDER, arguments = listOf(navArgument("citaId") { type = NavType.IntType })) { entrada ->
+            val citaId = entrada.arguments?.getInt("citaId") ?: 0
+            AtenderCitaScreen(atenderVm, citaId, onVolver = { nav.popBackStack() })
+        }
+        composable(Rutas.PACIENTES) {
+            Scaffold(bottomBar = { BarraInferior(nav, itemsVet) }) { padding ->
+                PacientesScreen(pacientesVm, onVerPaciente = { nav.navigate(Rutas.paciente(it)) }, modifier = Modifier.padding(padding))
+            }
+        }
+        composable(Rutas.PACIENTE, arguments = listOf(navArgument("id") { type = NavType.IntType })) { entrada ->
+            val id = entrada.arguments?.getInt("id") ?: 0
+            FichaMascotaScreen(vm = mascotaVm, mascotaId = id, onVolver = { nav.popBackStack() })
         }
     }
 }

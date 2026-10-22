@@ -53,8 +53,8 @@ fun FichaMascotaScreen(
     vm: MascotaViewModel,
     mascotaId: Int,
     onVolver: () -> Unit,
-    onEditar: () -> Unit,
-    onPedirCita: () -> Unit
+    onEditar: (() -> Unit)? = null,
+    onPedirCita: (() -> Unit)? = null
 ) {
     val mascota by remember(mascotaId) { vm.mascota(mascotaId) }.collectAsState()
     val historial by remember(mascotaId) { vm.historial(mascotaId) }.collectAsState()
@@ -78,10 +78,12 @@ fun FichaMascotaScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item { Cabecera(m) }
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    VetButton("Pedir cita", onPedirCita, Modifier.weight(1f))
-                    VetButton("Editar", onEditar, Modifier.weight(1f), contorno = true)
+            if (onPedirCita != null && onEditar != null) {
+                item {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        VetButton("Pedir cita", onPedirCita, Modifier.weight(1f))
+                        VetButton("Editar", onEditar, Modifier.weight(1f), contorno = true)
+                    }
                 }
             }
             item {
