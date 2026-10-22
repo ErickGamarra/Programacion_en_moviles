@@ -33,10 +33,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.gamarra.huellitasvet.data.local.entity.Mascota
-import com.gamarra.huellitasvet.model.Especie
 import com.gamarra.huellitasvet.ui.components.MascotaAvatar
+import com.gamarra.huellitasvet.ui.components.edadTexto
+import com.gamarra.huellitasvet.ui.components.nombreEspecie
 import com.gamarra.huellitasvet.viewmodel.InicioViewModel
-import java.time.LocalDate
 
 @Composable
 fun MascotasScreen(
@@ -93,7 +93,7 @@ private fun TarjetaMascota(mascota: Mascota, onClick: () -> Unit) {
                     "${nombreEspecie(mascota.especie)} · ${mascota.raza}",
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Text(edad(mascota.anioNacimiento), color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
+                Text(edadTexto(mascota.anioNacimiento), color = MaterialTheme.colorScheme.primary, fontSize = 13.sp)
             }
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
@@ -101,20 +101,5 @@ private fun TarjetaMascota(mascota: Mascota, onClick: () -> Unit) {
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-    }
-}
-
-private fun nombreEspecie(especie: String) = when (especie) {
-    Especie.PERRO.name -> "Perro"
-    Especie.GATO.name -> "Gato"
-    else -> "Otro"
-}
-
-private fun edad(anioNacimiento: Int): String {
-    val anios = LocalDate.now().year - anioNacimiento
-    return when {
-        anios < 1 -> "Menos de 1 año"
-        anios == 1 -> "1 año"
-        else -> "$anios años"
     }
 }

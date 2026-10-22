@@ -5,5 +5,10 @@ object Rutas {
     const val LOGIN = "login"
     const val INICIO = "inicio"
     const val MASCOTAS = "mascotas"
+    const val FICHA = "ficha/{id}"
+    const val FORMULARIO = "formulario?id={id}"
     const val PANEL = "panel"
+
+    fun ficha(id: Int) = "ficha/$id"
+    fun formulario(id: Int? = null) = if (id == null) "formulario" else "formulario?id=$id"
 }

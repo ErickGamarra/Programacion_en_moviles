@@ -17,17 +17,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.gamarra.huellitasvet.model.Rol
+import com.gamarra.huellitasvet.ui.dueno.FichaMascotaScreen
+import com.gamarra.huellitasvet.ui.dueno.FormularioMascotaScreen
 import com.gamarra.huellitasvet.ui.dueno.InicioScreen
 import com.gamarra.huellitasvet.ui.dueno.LoginScreen
 import com.gamarra.huellitasvet.ui.dueno.MascotasScreen
 import com.gamarra.huellitasvet.ui.dueno.SplashScreen
 import com.gamarra.huellitasvet.ui.veterinario.PanelScreen
 import com.gamarra.huellitasvet.viewmodel.InicioViewModel
+import com.gamarra.huellitasvet.viewmodel.MascotaViewModel
 import com.gamarra.huellitasvet.viewmodel.SesionViewModel
 import com.gamarra.huellitasvet.viewmodel.VetViewModelFactory
 
@@ -43,6 +48,7 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
     val nav = rememberNavController()
     val usuario by sesion.usuarioActual.collectAsState()
     val inicioVm: InicioViewModel = viewModel(factory = factory)
+    val mascotaVm: MascotaViewModel = viewModel(factory = factory)
 
     LaunchedEffect(usuario) { usuario?.let { inicioVm.cargar(it.id) } }
 
@@ -55,9 +61,9 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
         nav.navigate(destino) { popUpTo(desde) { inclusive = true } }
     }
 
-    // TODO Pasos 8 y 9: navegar a la ficha, al formulario y a pedir cita
-    val verMascota: (Int) -> Unit = {}
-    val agregarMascota: () -> Unit = {}
+    val verMascota: (Int) -> Unit = { nav.navigate(Rutas.ficha(it)) }
+    val agregarMascota: () -> Unit = { nav.navigate(Rutas.formulario()) }
+    // TODO Paso 9: navegar a pedir cita
     val pedirCita: () -> Unit = {}
 
     NavHost(navController = nav, startDestination = Rutas.SPLASH) {
@@ -72,6 +78,29 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
             Scaffold(bottomBar = { BarraInferior(nav, itemsDueno) }) { padding ->
                 MascotasScreen(inicioVm, verMascota, agregarMascota, Modifier.padding(padding))
             }
+        }
+        composable(Rutas.FICHA, arguments = listOf(navArgument("id") { type = NavType.IntType })) { entrada ->
+            val id = entrada.arguments?.getInt("id") ?: 0
+            FichaMascotaScreen(
+                vm = mascotaVm,
+                mascotaId = id,
+                onVolver = { nav.popBackStack() },
+                onEditar = { nav.navigate(Rutas.formulario(id)) },
+                onPedirCita = pedirCita
+            )
+        }
+        composable(
+            Rutas.FORMULARIO,
+            arguments = listOf(navArgument("id") { type = NavType.IntType; defaultValue = -1 })
+        ) { entrada ->
+            val id = entrada.arguments?.getInt("id")?.takeIf { it > 0 }
+            FormularioMascotaScreen(
+                vm = mascotaVm,
+                duenoId = usuario?.id ?: 0,
+                mascotaId = id,
+                onVolver = { nav.popBackStack() },
+                onEliminada = { nav.popBackStack(Rutas.MASCOTAS, inclusive = false) || nav.popBackStack(Rutas.INICIO, inclusive = false) }
+            )
         }
         composable(Rutas.PANEL) { PanelScreen(sesion) }
     }

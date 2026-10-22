@@ -11,6 +11,8 @@ class VetViewModelFactory(private val app: VetApp) : ViewModelProvider.Factory {
             SesionViewModel(app.repository, app.preferencias) as T
         modelClass.isAssignableFrom(InicioViewModel::class.java) ->
             InicioViewModel(app.repository) as T
+        modelClass.isAssignableFrom(MascotaViewModel::class.java) ->
+            MascotaViewModel(app.repository) as T
         else -> throw IllegalArgumentException("ViewModel desconocido")
     }
 }
