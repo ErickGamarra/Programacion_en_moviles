@@ -2,7 +2,9 @@ package com.gamarra.huellitasvet.ui.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -29,11 +31,14 @@ import com.gamarra.huellitasvet.ui.dueno.FormularioMascotaScreen
 import com.gamarra.huellitasvet.ui.dueno.InicioScreen
 import com.gamarra.huellitasvet.ui.dueno.LoginScreen
 import com.gamarra.huellitasvet.ui.dueno.MascotasScreen
+import com.gamarra.huellitasvet.ui.dueno.MisCitasScreen
 import com.gamarra.huellitasvet.ui.dueno.PedirCitaScreen
+import com.gamarra.huellitasvet.ui.dueno.PerfilScreen
 import com.gamarra.huellitasvet.ui.dueno.SplashScreen
 import com.gamarra.huellitasvet.ui.veterinario.PanelScreen
 import com.gamarra.huellitasvet.viewmodel.InicioViewModel
 import com.gamarra.huellitasvet.viewmodel.MascotaViewModel
+import com.gamarra.huellitasvet.viewmodel.MisCitasViewModel
 import com.gamarra.huellitasvet.viewmodel.PedirCitaViewModel
 import com.gamarra.huellitasvet.viewmodel.SesionViewModel
 import com.gamarra.huellitasvet.viewmodel.VetViewModelFactory
@@ -42,7 +47,9 @@ private data class ItemBarra(val ruta: String, val texto: String, val icono: Ima
 
 private val itemsDueno = listOf(
     ItemBarra(Rutas.INICIO, "Inicio", Icons.Filled.Home),
-    ItemBarra(Rutas.MASCOTAS, "Mascotas", Icons.Filled.Pets)
+    ItemBarra(Rutas.MASCOTAS, "Mascotas", Icons.Filled.Pets),
+    ItemBarra(Rutas.CITAS, "Citas", Icons.Filled.CalendarMonth),
+    ItemBarra(Rutas.PERFIL, "Perfil", Icons.Filled.Person)
 )
 
 @Composable
@@ -52,8 +59,14 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
     val inicioVm: InicioViewModel = viewModel(factory = factory)
     val mascotaVm: MascotaViewModel = viewModel(factory = factory)
     val pedirCitaVm: PedirCitaViewModel = viewModel(factory = factory)
+    val misCitasVm: MisCitasViewModel = viewModel(factory = factory)
 
-    LaunchedEffect(usuario) { usuario?.let { inicioVm.cargar(it.id) } }
+    LaunchedEffect(usuario) {
+        usuario?.let {
+            inicioVm.cargar(it.id)
+            misCitasVm.cargar(it.id)
+        }
+    }
 
     fun irAPrincipal(rol: Rol?, desde: String) {
         val destino = when (rol) {
@@ -79,6 +92,20 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
         composable(Rutas.MASCOTAS) {
             Scaffold(bottomBar = { BarraInferior(nav, itemsDueno) }) { padding ->
                 MascotasScreen(inicioVm, verMascota, agregarMascota, Modifier.padding(padding))
+            }
+        }
+        composable(Rutas.CITAS) {
+            Scaffold(bottomBar = { BarraInferior(nav, itemsDueno) }) { padding ->
+                MisCitasScreen(misCitasVm, pedirCita, Modifier.padding(padding))
+            }
+        }
+        composable(Rutas.PERFIL) {
+            Scaffold(bottomBar = { BarraInferior(nav, itemsDueno) }) { padding ->
+                PerfilScreen(
+                    sesion,
+                    onCerrarSesion = { nav.navigate(Rutas.LOGIN) { popUpTo(nav.graph.id) { inclusive = true } } },
+                    modifier = Modifier.padding(padding)
+                )
             }
         }
         composable(Rutas.FICHA, arguments = listOf(navArgument("id") { type = NavType.IntType })) { entrada ->
@@ -110,8 +137,16 @@ fun NavVet(sesion: SesionViewModel, factory: VetViewModelFactory) {
         ) { entrada ->
             val mascotaId = entrada.arguments?.getInt("mascotaId")?.takeIf { it > 0 }
             LaunchedEffect(Unit) { pedirCitaVm.iniciar(usuario?.id ?: 0, mascotaId) }
-            // TODO Paso 10: al crear la cita ir a Mis citas
-            PedirCitaScreen(pedirCitaVm, onVolver = { nav.popBackStack() }, onCreada = { nav.popBackStack() })
+            PedirCitaScreen(
+                pedirCitaVm,
+                onVolver = { nav.popBackStack() },
+                onCreada = {
+                    nav.navigate(Rutas.CITAS) {
+                        popUpTo(Rutas.INICIO)
+                        launchSingleTop = true
+                    }
+                }
+            )
         }
         composable(Rutas.PANEL) { PanelScreen(sesion) }
     }

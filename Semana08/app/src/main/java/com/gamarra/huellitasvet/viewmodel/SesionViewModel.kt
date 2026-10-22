@@ -60,6 +60,14 @@ class SesionViewModel(
         return Rol.valueOf(perfil)
     }
 
+    fun cerrarSesion(onCerrada: () -> Unit) {
+        viewModelScope.launch {
+            prefs.cerrarSesion()
+            _usuarioActual.value = null
+            onCerrada()
+        }
+    }
+
     fun limpiarError() {
         _error.value = null
     }

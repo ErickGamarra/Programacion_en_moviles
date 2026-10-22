@@ -5,6 +5,8 @@ object Rutas {
     const val LOGIN = "login"
     const val INICIO = "inicio"
     const val MASCOTAS = "mascotas"
+    const val CITAS = "citas"
+    const val PERFIL = "perfil"
     const val FICHA = "ficha/{id}"
     const val FORMULARIO = "formulario?id={id}"
     const val PEDIR_CITA = "pedirCita?mascotaId={mascotaId}"
