@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "542427431178",
+    "project_id": "authfirebaseappgamarra",
+    "storage_bucket": "authfirebaseappgamarra.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:542427431178:android:81479d17ba9b229a683af3",
+        "android_client_info": {
+          "package_name": "com.gamarra.authfirebaseapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAItIfSeVA3QX83ZLwOYieB0EB-b33K7L4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
