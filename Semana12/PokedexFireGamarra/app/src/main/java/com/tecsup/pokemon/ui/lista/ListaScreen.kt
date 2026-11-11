@@ -7,7 +7,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,14 +35,16 @@ import com.tecsup.pokemon.ui.theme.PokedexFireGamarraTheme
 @Composable
 fun ListaScreen(
     viewModel: ListaViewModel,
-    onItemClick: (Int) -> Unit
+    onItemClick: (Int) -> Unit,
+    onAbrirFavoritos: () -> Unit
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     ListaContenido(
         estado = estado,
         onItemClick = onItemClick,
         onFavorito = { viewModel.alternarFavorito(it) },
-        onReintentar = viewModel::refrescar
+        onReintentar = viewModel::refrescar,
+        onAbrirFavoritos = onAbrirFavoritos
     )
 }
 
@@ -48,15 +54,22 @@ fun ListaContenido(
     estado: UiState<List<Item>>,
     onItemClick: (Int) -> Unit,
     onFavorito: (Int) -> Unit,
-    onReintentar: () -> Unit
+    onReintentar: () -> Unit,
+    onAbrirFavoritos: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Pokédex de Fuego") },
+                actions = {
+                    IconButton(onClick = onAbrirFavoritos) {
+                        Icon(Icons.Filled.Favorite, contentDescription = "Favoritos")
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         }

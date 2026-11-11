@@ -10,6 +10,8 @@ import androidx.navigation.navArgument
 import com.tecsup.pokemon.AppContainer
 import com.tecsup.pokemon.ui.detalle.DetalleScreen
 import com.tecsup.pokemon.ui.detalle.DetalleViewModel
+import com.tecsup.pokemon.ui.favoritos.FavoritosScreen
+import com.tecsup.pokemon.ui.favoritos.FavoritosViewModel
 import com.tecsup.pokemon.ui.lista.ListaScreen
 import com.tecsup.pokemon.ui.lista.ListaViewModel
 
@@ -17,6 +19,7 @@ import com.tecsup.pokemon.ui.lista.ListaViewModel
 object Rutas {
     const val LISTA = "lista"
     const val DETALLE = "detalle/{id}"
+    const val FAVORITOS = "favoritos"
     fun detalle(id: Int) = "detalle/$id"
 }
 
@@ -30,7 +33,17 @@ fun AppNav(container: AppContainer) {
             val vm: ListaViewModel = viewModel(factory = ListaViewModel.factory(container))
             ListaScreen(
                 viewModel = vm,
-                onItemClick = { id -> navController.navigate(Rutas.detalle(id)) }
+                onItemClick = { id -> navController.navigate(Rutas.detalle(id)) },
+                onAbrirFavoritos = { navController.navigate(Rutas.FAVORITOS) }
+            )
+        }
+
+        composable(Rutas.FAVORITOS) {
+            val vm: FavoritosViewModel = viewModel(factory = FavoritosViewModel.factory(container))
+            FavoritosScreen(
+                viewModel = vm,
+                onItemClick = { id -> navController.navigate(Rutas.detalle(id)) },
+                onVolver = { navController.popBackStack() }
             )
         }
 
