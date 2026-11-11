@@ -28,12 +28,24 @@ class ListaViewModel(
     private val _aviso = MutableStateFlow<String?>(null)
     val aviso: StateFlow<String?> = _aviso.asStateFlow()
 
+    // Texto del buscador
+    private val _busqueda = MutableStateFlow("")
+    val busqueda: StateFlow<String> = _busqueda.asStateFlow()
+
+    // true mientras se sincroniza deslizando hacia abajo
+    private val _refrescando = MutableStateFlow(false)
+    val refrescando: StateFlow<Boolean> = _refrescando.asStateFlow()
+
+    // Última lista que llegó de Room (sin filtrar)
+    private var ultimaLista: List<Item> = emptyList()
+
     private var refrescoTerminado = false
 
     init {
         viewModelScope.launch {
             repo.items.collect { lista ->
-                if (lista.isNotEmpty() || refrescoTerminado) _estado.value = UiState.Exito(lista)
+                ultimaLista = lista
+                if (lista.isNotEmpty() || refrescoTerminado) _estado.value = UiState.Exito(filtrar(lista))
             }
         }
         refrescar()
@@ -54,6 +66,34 @@ class ListaViewModel(
                     if (repo.cantidadGuardada() == 0) _estado.value = UiState.Error(mensajeDe(e))
                     else _aviso.value = "Sin conexión: mostrando datos guardados"
                 }
+        }
+    }
+
+    // Filtra por nombre o por número de Pokédex ("char", "#006", "6")
+    fun buscar(texto: String) {
+        _busqueda.value = texto
+        if (_estado.value is UiState.Exito) _estado.value = UiState.Exito(filtrar(ultimaLista))
+    }
+
+    // Deslizar hacia abajo: sincroniza sin quitar la lista de la pantalla
+    fun refrescarDeslizando() {
+        viewModelScope.launch {
+            _refrescando.value = true
+            repo.refrescar()
+                .onSuccess { n ->
+                    _aviso.value = null
+                    notificador.mostrar("Datos actualizados", "Se guardaron $n elementos")
+                }
+                .onFailure { _aviso.value = "Sin conexión: mostrando datos guardados" }
+            _refrescando.value = false
+        }
+    }
+
+    private fun filtrar(lista: List<Item>): List<Item> {
+        val texto = _busqueda.value.trim().lowercase().removePrefix("#")
+        if (texto.isEmpty()) return lista
+        return lista.filter { item ->
+            item.titulo.contains(texto) || item.id.toString() == texto.trimStart('0')
         }
     }
 

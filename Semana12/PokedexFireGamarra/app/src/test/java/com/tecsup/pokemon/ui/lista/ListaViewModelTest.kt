@@ -116,4 +116,20 @@ class ListaViewModelTest {
 
         assertEquals(UiState.Exito(listOf(vulpix)), vm.estado.value)
     }
+
+    @Test
+    fun `buscar filtra por nombre y por numero`() = runTest(dispatcher) {
+        val repo = RepositorioFalso().apply { respuestaApi = Result.success(listOf(charmander, vulpix)) }
+        val vm = ListaViewModel(repo, NotificadorFalso())
+        advanceUntilIdle()
+
+        vm.buscar("vul")
+        assertEquals(UiState.Exito(listOf(vulpix)), vm.estado.value)
+
+        vm.buscar("#004")
+        assertEquals(UiState.Exito(listOf(charmander)), vm.estado.value)
+
+        vm.buscar("")
+        assertEquals(2, (vm.estado.value as UiState.Exito).datos.size)
+    }
 }

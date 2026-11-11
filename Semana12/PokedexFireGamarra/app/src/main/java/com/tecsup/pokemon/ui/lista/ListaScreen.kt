@@ -17,6 +17,12 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,9 +60,15 @@ fun ListaScreen(
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val aviso by viewModel.aviso.collectAsStateWithLifecycle()
+    val busqueda by viewModel.busqueda.collectAsStateWithLifecycle()
+    val refrescando by viewModel.refrescando.collectAsStateWithLifecycle()
     ListaContenido(
         estado = estado,
         aviso = aviso,
+        busqueda = busqueda,
+        onBuscar = viewModel::buscar,
+        refrescando = refrescando,
+        onDeslizar = viewModel::refrescarDeslizando,
         onItemClick = onItemClick,
         onFavorito = { viewModel.alternarFavorito(it) },
         onReintentar = viewModel::refrescar,
@@ -72,6 +84,10 @@ fun ListaScreen(
 fun ListaContenido(
     estado: UiState<List<Item>>,
     aviso: String?,
+    busqueda: String = "",
+    onBuscar: (String) -> Unit = {},
+    refrescando: Boolean = false,
+    onDeslizar: () -> Unit = {},
     onItemClick: (Int) -> Unit,
     onFavorito: (Int) -> Unit,
     onReintentar: () -> Unit,
@@ -113,7 +129,7 @@ fun ListaContenido(
             is UiState.Cargando -> Cargando(modifier = modifier)
             is UiState.Error -> ErrorView(estado.mensaje, onReintentar, modifier)
             is UiState.Exito -> {
-                if (estado.datos.isEmpty()) {
+                if (estado.datos.isEmpty() && busqueda.isBlank()) {
                     VacioView(
                         mensaje = "No hay Pokémon guardados.",
                         textoBoton = "Volver a cargar",
@@ -123,12 +139,51 @@ fun ListaContenido(
                 } else {
                     Column(modifier) {
                         if (aviso != null) AvisoSinConexion(aviso, onReintentar)
-                        GrillaPokemon(estado.datos, onItemClick, onFavorito, Modifier.weight(1f))
+                        Buscador(busqueda, onBuscar)
+                        // Deslizar hacia abajo para sincronizar
+                        PullToRefreshBox(
+                            isRefreshing = refrescando,
+                            onRefresh = onDeslizar,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            if (estado.datos.isEmpty()) {
+                                VacioView(mensaje = "Ningún Pokémon coincide con \"$busqueda\".")
+                            } else {
+                                GrillaPokemon(estado.datos, onItemClick, onFavorito, Modifier.fillMaxSize())
+                            }
+                        }
                     }
                 }
             }
         }
     }
+}
+
+// Campo de búsqueda por nombre o número
+@Composable
+private fun Buscador(texto: String, onBuscar: (String) -> Unit) {
+    OutlinedTextField(
+        value = texto,
+        onValueChange = onBuscar,
+        placeholder = { Text("Buscar por nombre o número") },
+        leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
+        trailingIcon = {
+            if (texto.isNotEmpty()) {
+                IconButton(onClick = { onBuscar("") }) {
+                    Icon(Icons.Outlined.Close, contentDescription = "Borrar búsqueda")
+                }
+            }
+        },
+        singleLine = true,
+        shape = RoundedCornerShape(50),
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 12.dp)
+    )
 }
 
 // Franja que avisa que se muestran datos guardados
@@ -192,7 +247,7 @@ val pokemonDePrueba = listOf(
 @Composable
 private fun ListaPreview() {
     PokedexFireGamarraTheme {
-        ListaContenido(UiState.Exito(pokemonDePrueba), "Sin conexión: mostrando datos guardados", {}, {}, {})
+        ListaContenido(estado = UiState.Exito(pokemonDePrueba), aviso = null, onItemClick = {}, onFavorito = {}, onReintentar = {})
     }
 }
 
@@ -200,6 +255,6 @@ private fun ListaPreview() {
 @Composable
 private fun ListaErrorPreview() {
     PokedexFireGamarraTheme {
-        ListaContenido(UiState.Error("No hay conexión a internet"), null, {}, {}, {})
+        ListaContenido(estado = UiState.Error("No hay conexión a internet"), aviso = null, onItemClick = {}, onFavorito = {}, onReintentar = {})
     }
 }
