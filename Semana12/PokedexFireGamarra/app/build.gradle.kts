@@ -44,6 +44,10 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
 
+    // ViewModel en Compose y collectAsStateWithLifecycle
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+
     // Coil: carga las imágenes de los Pokémon desde internet
     implementation(libs.coil.compose)
 
