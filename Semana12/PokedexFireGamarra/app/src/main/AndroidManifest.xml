@@ -4,6 +4,8 @@
 
     <!-- Internet para la API y las imágenes -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Notificación local al sincronizar (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:allowBackup="true"
@@ -17,6 +19,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:label="@string/app_name"
             android:theme="@style/Theme.PokedexFireGamarra"
             android:windowSoftInputMode="adjustResize">

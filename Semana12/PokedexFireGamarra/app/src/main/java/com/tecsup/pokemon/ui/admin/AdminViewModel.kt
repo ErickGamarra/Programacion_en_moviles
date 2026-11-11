@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.tecsup.pokemon.AppContainer
 import com.tecsup.pokemon.data.repository.ItemRepository
+import com.tecsup.pokemon.notification.Notificador
 import com.tecsup.pokemon.ui.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +21,8 @@ data class Totales(
 )
 
 class AdminViewModel(
-    private val repo: ItemRepository
+    private val repo: ItemRepository,
+    private val notificador: Notificador
 ) : ViewModel() {
 
     private val _estado = MutableStateFlow<UiState<Totales>>(UiState.Cargando)
@@ -45,7 +47,10 @@ class AdminViewModel(
         viewModelScope.launch {
             _trabajando.value = true
             repo.refrescar()
-                .onSuccess { n -> _mensaje.value = "Sincronizado: se guardaron $n Pokémon" }
+                .onSuccess { n ->
+                    _mensaje.value = "Sincronizado: se guardaron $n Pokémon"
+                    notificador.mostrar("Datos actualizados", "Se guardaron $n elementos")
+                }
                 .onFailure { _mensaje.value = "No se pudo sincronizar. Revisa tu conexión" }
             _trabajando.value = false
         }
@@ -64,7 +69,7 @@ class AdminViewModel(
 
     companion object {
         fun factory(container: AppContainer) = viewModelFactory {
-            initializer { AdminViewModel(container.itemRepository) }
+            initializer { AdminViewModel(container.itemRepository, container.notificador) }
         }
     }
 }
