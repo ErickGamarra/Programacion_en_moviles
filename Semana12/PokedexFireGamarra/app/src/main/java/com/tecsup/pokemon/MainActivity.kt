@@ -4,13 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.tecsup.pokemon.ui.lista.ListaScreen
+import com.tecsup.pokemon.ui.lista.pokemonDePrueba
 import com.tecsup.pokemon.ui.theme.PokedexFireGamarraTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +18,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PokedexFireGamarraTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                // Lista con datos de prueba (todavía sin API)
+                var items by remember { mutableStateOf(pokemonDePrueba) }
+                ListaScreen(
+                    items = items,
+                    onItemClick = { },
+                    onFavorito = { id ->
+                        items = items.map { if (it.id == id) it.copy(esFavorito = !it.esFavorito) else it }
+                    }
+                )
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    PokedexFireGamarraTheme {
-        Greeting("Android")
     }
 }

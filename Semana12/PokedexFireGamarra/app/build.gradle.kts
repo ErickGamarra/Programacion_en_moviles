@@ -36,6 +36,9 @@ android {
 }
 
 dependencies {
+    // Coil: carga las imágenes de los Pokémon desde internet
+    implementation(libs.coil.compose)
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
