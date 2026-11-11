@@ -1,10 +1,13 @@
 package com.tecsup.pokemon.data.mapper
 
+import com.tecsup.pokemon.data.local.ItemEntity
 import com.tecsup.pokemon.data.remote.dto.ItemDto
 import com.tecsup.pokemon.data.remote.dto.PokemonDetalleDto
 import com.tecsup.pokemon.domain.model.DetallePokemon
 import com.tecsup.pokemon.domain.model.Estadistica
 import com.tecsup.pokemon.domain.model.Item
+
+// Tres modelos: ItemDto (API) -> ItemEntity (Room) -> Item (UI)
 
 private const val URL_ARTE =
     "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/"
@@ -15,12 +18,21 @@ fun urlArte(id: Int) = "$URL_ARTE$id.png"
 // Número de Pokédex con tres cifras: 4 -> "#004"
 fun numeroPokedex(id: Int) = "#" + id.toString().padStart(3, '0')
 
-// Dto (API) -> Item (UI)
-fun ItemDto.aModelo(esFavorito: Boolean = false) = Item(
+// Dto (API) -> Entity (Room)
+fun ItemDto.aEntity(esFavorito: Boolean = false) = ItemEntity(
     id = id,
     titulo = name,
     subtitulo = numeroPokedex(id),
     imagenUrl = urlArte(id),
+    esFavorito = esFavorito
+)
+
+// Entity (Room) -> Item (UI)
+fun ItemEntity.aModelo() = Item(
+    id = id,
+    titulo = titulo,
+    subtitulo = subtitulo,
+    imagenUrl = imagenUrl,
     esFavorito = esFavorito
 )
 

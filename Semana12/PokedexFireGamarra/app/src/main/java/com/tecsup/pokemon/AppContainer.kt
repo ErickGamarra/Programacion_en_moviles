@@ -1,6 +1,7 @@
 package com.tecsup.pokemon
 
 import android.content.Context
+import com.tecsup.pokemon.data.local.AppDatabase
 import com.tecsup.pokemon.data.remote.ApiService
 import com.tecsup.pokemon.data.remote.RetrofitClient
 import com.tecsup.pokemon.data.repository.ItemRepository
@@ -10,8 +11,9 @@ import com.tecsup.pokemon.data.repository.ItemRepositoryImpl
 class AppContainer private constructor(context: Context) {
 
     private val api: ApiService = RetrofitClient.api
+    private val database: AppDatabase = AppDatabase.crear(context)
 
-    val itemRepository: ItemRepository = ItemRepositoryImpl(api)
+    val itemRepository: ItemRepository = ItemRepositoryImpl(api, database.itemDao())
 
     companion object {
         @Volatile
