@@ -151,6 +151,21 @@ private fun FichaPokemon(item: Item, modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
+            if (detalle == null) {
+                // Sin internet: solo hay datos básicos guardados en Room
+                Spacer(Modifier.height(16.dp))
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiary,
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        "Sin conexión: se muestran solo los datos guardados. Conéctate para ver tipos, habilidades y estadísticas.",
+                        color = MaterialTheme.colorScheme.onTertiary,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
             if (detalle != null) {
                 Spacer(Modifier.height(12.dp))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

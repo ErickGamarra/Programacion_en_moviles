@@ -34,15 +34,18 @@ class ItemRepositoryImpl(
         Result.failure(e)
     }
 
-    // Segundo endpoint: busca el nombre en Room y pide /pokemon/{nombre}
-    override suspend fun obtenerDetalle(id: Int): Result<Item> = try {
+    // Segundo endpoint: busca el nombre en Room y pide /pokemon/{nombre}.
+    // Sin internet devuelve la ficha básica guardada en Room (sin detalle).
+    override suspend fun obtenerDetalle(id: Int): Result<Item> {
         val guardado = dao.buscar(id)
-        val nombre = guardado?.titulo ?: id.toString()
-        Result.success(api.detalle(nombre).aModelo(esFavorito = guardado?.esFavorito ?: false))
-    } catch (e: IOException) {
-        Result.failure(e)
-    } catch (e: HttpException) {
-        Result.failure(e)
+        return try {
+            val nombre = guardado?.titulo ?: id.toString()
+            Result.success(api.detalle(nombre).aModelo(esFavorito = guardado?.esFavorito ?: false))
+        } catch (e: IOException) {
+            guardado?.let { Result.success(it.aModelo()) } ?: Result.failure(e)
+        } catch (e: HttpException) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun alternarFavorito(id: Int) = dao.alternarFavorito(id)
