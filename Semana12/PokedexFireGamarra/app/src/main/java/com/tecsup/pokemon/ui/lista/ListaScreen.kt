@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material3.Surface
@@ -45,7 +46,8 @@ import com.tecsup.pokemon.ui.theme.PokedexFireGamarraTheme
 fun ListaScreen(
     viewModel: ListaViewModel,
     onItemClick: (Int) -> Unit,
-    onAbrirFavoritos: () -> Unit
+    onAbrirFavoritos: () -> Unit,
+    onCerrarSesion: () -> Unit
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val aviso by viewModel.aviso.collectAsStateWithLifecycle()
@@ -55,7 +57,8 @@ fun ListaScreen(
         onItemClick = onItemClick,
         onFavorito = { viewModel.alternarFavorito(it) },
         onReintentar = viewModel::refrescar,
-        onAbrirFavoritos = onAbrirFavoritos
+        onAbrirFavoritos = onAbrirFavoritos,
+        onCerrarSesion = onCerrarSesion
     )
 }
 
@@ -67,7 +70,8 @@ fun ListaContenido(
     onItemClick: (Int) -> Unit,
     onFavorito: (Int) -> Unit,
     onReintentar: () -> Unit,
-    onAbrirFavoritos: () -> Unit = {}
+    onAbrirFavoritos: () -> Unit = {},
+    onCerrarSesion: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -76,6 +80,9 @@ fun ListaContenido(
                 actions = {
                     IconButton(onClick = onAbrirFavoritos) {
                         Icon(Icons.Filled.Favorite, contentDescription = "Favoritos")
+                    }
+                    IconButton(onClick = onCerrarSesion) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Cerrar sesión")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

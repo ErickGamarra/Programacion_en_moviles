@@ -1,6 +1,8 @@
 package com.tecsup.pokemon
 
 import android.content.Context
+import com.tecsup.pokemon.data.auth.AuthRepository
+import com.tecsup.pokemon.data.auth.FirebaseAuthRepository
 import com.tecsup.pokemon.data.local.AppDatabase
 import com.tecsup.pokemon.data.remote.ApiService
 import com.tecsup.pokemon.data.remote.RetrofitClient
@@ -14,6 +16,7 @@ class AppContainer private constructor(context: Context) {
     private val database: AppDatabase = AppDatabase.crear(context)
 
     val itemRepository: ItemRepository = ItemRepositoryImpl(api, database.itemDao())
+    val authRepository: AuthRepository = FirebaseAuthRepository()
 
     companion object {
         @Volatile
