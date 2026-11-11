@@ -23,6 +23,21 @@ Laboratorio 11-12 de Programación en Móviles (Tecsup) · Erick Gamarra · trab
 |---|---|---|
 | ![Panel Admin](capturas/5_panel_admin.png) | ![Notificación](capturas/6_notificacion.png) | ![Sin conexión](capturas/7_sin_conexion.png) |
 
+## Fase 2: mejoras con IA (rama `mejora-ia-pokemon`)
+
+| Mejora | Detalle |
+|---|---|
+| Pruebas unitarias (R12) | 7 pruebas del `ListaViewModel` con `RepositorioFalso` y `NotificadorFalso` (`app/src/test`) |
+| Buscador | Filtra por nombre o número (`char`, `#006`) desde el ViewModel |
+| Deslizar para sincronizar | `PullToRefreshBox` sin perder la lista de la pantalla |
+| Detalle sin conexión | Sin internet muestra la ficha guardada en Room con un aviso |
+
+| Buscador | Detalle sin conexión |
+|---|---|
+| ![Buscador](capturas/8_busqueda.png) | ![Detalle sin conexión](capturas/9_detalle_sin_conexion.png) |
+
+Las consultas a la IA están en [PROMPTS.md](PROMPTS.md). Para correr las pruebas: `./gradlew :app:testDebugUnitTest`.
+
 ## Tecnologías
 
 | Tema | Uso |
