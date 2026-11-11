@@ -22,6 +22,10 @@ class ListaViewModel(
     private val _estado = MutableStateFlow<UiState<List<Item>>>(UiState.Cargando)
     val estado: StateFlow<UiState<List<Item>>> = _estado.asStateFlow()
 
+    // Aviso cuando no hay internet pero sí hay datos guardados
+    private val _aviso = MutableStateFlow<String?>(null)
+    val aviso: StateFlow<String?> = _aviso.asStateFlow()
+
     private var refrescoTerminado = false
 
     init {
@@ -41,9 +45,11 @@ class ListaViewModel(
             resultado
                 .onSuccess {
                     if (_estado.value is UiState.Cargando) _estado.value = UiState.Exito(emptyList())
+                    _aviso.value = null
                 }
                 .onFailure { e ->
                     if (repo.cantidadGuardada() == 0) _estado.value = UiState.Error(mensajeDe(e))
+                    else _aviso.value = "Sin conexión: mostrando datos guardados"
                 }
         }
     }
