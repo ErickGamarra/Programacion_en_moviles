@@ -21,7 +21,13 @@ private val EsquemaClaro = lightColorScheme(
     surface = Crema,
     onSurface = Ceniza,
     surfaceVariant = Color(0xFFF6E3DA),
-    onSurfaceVariant = Color(0xFF5A4740)
+    onSurfaceVariant = Color(0xFF5A4740),
+    // Tonos cálidos para tarjetas y paneles (por defecto Material usa lila)
+    surfaceContainerLowest = Color.White,
+    surfaceContainerLow = Color(0xFFFFF1EA),
+    surfaceContainer = Color(0xFFFBEAE2),
+    surfaceContainerHigh = Color(0xFFF6E3DA),
+    surfaceContainerHighest = Color(0xFFF0DCD2)
 )
 
 private val EsquemaOscuro = darkColorScheme(
@@ -38,7 +44,12 @@ private val EsquemaOscuro = darkColorScheme(
     surface = NocheVolcan,
     onSurface = Color(0xFFF1DFD8),
     surfaceVariant = SuperficieOscura,
-    onSurfaceVariant = Color(0xFFD8C2BA)
+    onSurfaceVariant = Color(0xFFD8C2BA),
+    surfaceContainerLowest = Color(0xFF140E0C),
+    surfaceContainerLow = Color(0xFF221A17),
+    surfaceContainer = Color(0xFF2A211E),
+    surfaceContainerHigh = Color(0xFF342A26),
+    surfaceContainerHighest = Color(0xFF3F3430)
 )
 
 @Composable
