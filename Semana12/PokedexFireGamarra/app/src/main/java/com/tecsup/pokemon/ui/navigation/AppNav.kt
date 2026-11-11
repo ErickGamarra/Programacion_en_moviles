@@ -1,6 +1,8 @@
 package com.tecsup.pokemon.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -8,6 +10,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.tecsup.pokemon.AppContainer
+import com.tecsup.pokemon.domain.model.Rol
+import com.tecsup.pokemon.ui.admin.AdminScreen
+import com.tecsup.pokemon.ui.admin.AdminViewModel
 import com.tecsup.pokemon.ui.detalle.DetalleScreen
 import com.tecsup.pokemon.ui.detalle.DetalleViewModel
 import com.tecsup.pokemon.ui.favoritos.FavoritosScreen
@@ -23,6 +28,7 @@ object Rutas {
     const val LISTA = "lista"
     const val DETALLE = "detalle/{id}"
     const val FAVORITOS = "favoritos"
+    const val ADMIN = "admin"
     fun detalle(id: Int) = "detalle/$id"
 }
 
@@ -31,6 +37,10 @@ fun AppNav(container: AppContainer) {
     val navController = rememberNavController()
     // El LoginViewModel vive en la Activity: guarda la sesión mientras la app está abierta
     val loginVm: LoginViewModel = viewModel(factory = LoginViewModel.factory(container))
+    val loginEstado by loginVm.estado.collectAsStateWithLifecycle()
+    // El rol viene de Firestore; la pantalla solo decide qué mostrar
+    val sesion = loginEstado.sesion
+    val esAdmin = sesion?.rol == Rol.ADMIN
 
     // Cerrar sesión: limpia el login y vuelve a la pantalla de ingreso sin historial
     val cerrarSesion: () -> Unit = {
@@ -59,7 +69,23 @@ fun AppNav(container: AppContainer) {
                 viewModel = vm,
                 onItemClick = { id -> navController.navigate(Rutas.detalle(id)) },
                 onAbrirFavoritos = { navController.navigate(Rutas.FAVORITOS) },
-                onCerrarSesion = cerrarSesion
+                onCerrarSesion = cerrarSesion,
+                esAdmin = esAdmin,
+                onAbrirAdmin = { navController.navigate(Rutas.ADMIN) }
+            )
+        }
+
+        composable(Rutas.ADMIN) {
+            // Si alguien llega aquí sin ser admin, vuelve atrás
+            if (!esAdmin) {
+                navController.popBackStack()
+                return@composable
+            }
+            val vm: AdminViewModel = viewModel(factory = AdminViewModel.factory(container))
+            AdminScreen(
+                viewModel = vm,
+                correo = sesion?.correo ?: "",
+                onVolver = { navController.popBackStack() }
             )
         }
 

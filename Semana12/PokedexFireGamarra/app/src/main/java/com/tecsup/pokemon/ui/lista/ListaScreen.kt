@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.CloudOff
 import androidx.compose.material3.Surface
@@ -47,7 +48,9 @@ fun ListaScreen(
     viewModel: ListaViewModel,
     onItemClick: (Int) -> Unit,
     onAbrirFavoritos: () -> Unit,
-    onCerrarSesion: () -> Unit
+    onCerrarSesion: () -> Unit,
+    esAdmin: Boolean = false,
+    onAbrirAdmin: () -> Unit = {}
 ) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
     val aviso by viewModel.aviso.collectAsStateWithLifecycle()
@@ -58,7 +61,9 @@ fun ListaScreen(
         onFavorito = { viewModel.alternarFavorito(it) },
         onReintentar = viewModel::refrescar,
         onAbrirFavoritos = onAbrirFavoritos,
-        onCerrarSesion = onCerrarSesion
+        onCerrarSesion = onCerrarSesion,
+        esAdmin = esAdmin,
+        onAbrirAdmin = onAbrirAdmin
     )
 }
 
@@ -71,13 +76,21 @@ fun ListaContenido(
     onFavorito: (Int) -> Unit,
     onReintentar: () -> Unit,
     onAbrirFavoritos: () -> Unit = {},
-    onCerrarSesion: () -> Unit = {}
+    onCerrarSesion: () -> Unit = {},
+    esAdmin: Boolean = false,
+    onAbrirAdmin: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Pokédex de Fuego") },
                 actions = {
+                    // Solo el admin ve el acceso al panel
+                    if (esAdmin) {
+                        IconButton(onClick = onAbrirAdmin) {
+                            Icon(Icons.Filled.AdminPanelSettings, contentDescription = "Panel Admin")
+                        }
+                    }
                     IconButton(onClick = onAbrirFavoritos) {
                         Icon(Icons.Filled.Favorite, contentDescription = "Favoritos")
                     }
