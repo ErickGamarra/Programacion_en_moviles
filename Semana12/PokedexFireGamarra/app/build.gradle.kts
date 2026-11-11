@@ -48,6 +48,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
 
+    // Navegación
+    implementation(libs.androidx.navigation.compose)
+
     // Coil: carga las imágenes de los Pokémon desde internet
     implementation(libs.coil.compose)
 

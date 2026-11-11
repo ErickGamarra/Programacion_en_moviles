@@ -4,9 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.tecsup.pokemon.ui.lista.ListaScreen
-import com.tecsup.pokemon.ui.lista.ListaViewModel
+import com.tecsup.pokemon.ui.navigation.AppNav
 import com.tecsup.pokemon.ui.theme.PokedexFireGamarraTheme
 
 class MainActivity : ComponentActivity() {
@@ -16,8 +14,7 @@ class MainActivity : ComponentActivity() {
         val container = AppContainer.obtener(applicationContext)
         setContent {
             PokedexFireGamarraTheme {
-                val listaViewModel: ListaViewModel = viewModel(factory = ListaViewModel.factory(container))
-                ListaScreen(viewModel = listaViewModel, onItemClick = { })
+                AppNav(container)
             }
         }
     }
