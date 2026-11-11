@@ -95,12 +95,14 @@ app/src/main/java/com/tecsup/pokemon/
 ## Usuarios de prueba (Firebase)
 
 1. En Firebase Console → Authentication → Método de acceso, activar **Correo electrónico/contraseña**.
-2. En Authentication → Usuarios, crear dos usuarios:
+2. En Authentication → Usuarios, crear dos usuarios con una contraseña de al menos 6 caracteres:
 
-| Rol | Correo | Clave |
-|---|---|---|
-| Admin | `admin@pokedex.com` | `fuego123` |
-| Usuario | `usuario@pokedex.com` | `fuego123` |
+| Rol | Correo |
+|---|---|
+| Admin | `admin@pokedex.com` |
+| Usuario | `usuario@pokedex.com` |
+
+   Las contraseñas no se guardan en el repositorio; se entregan al docente aparte.
 
 3. En Firestore, crear la colección `usuarios` con un documento por usuario. **El ID del documento es el UID** copiado de Authentication, con los campos `rol` (`admin` o `usuario`) y `nombre`.
 4. Publicar las reglas:
