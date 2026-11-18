@@ -53,6 +53,7 @@ fun PantallaTareas(vm: TareasViewModel) {
     val primos by vm.primos.collectAsState()
     val carga by vm.carga.collectAsState()
     val simularError by vm.simularError.collectAsState()
+    val limiteActivo by vm.limiteActivo.collectAsState()
     var textoN by rememberSaveable { mutableStateOf("$N_POR_DEFECTO") }
     // Prueba de vida: si deja de sumar, la pantalla está congelada
     var toques by rememberSaveable { mutableIntStateOf(0) }
@@ -143,6 +144,10 @@ fun PantallaTareas(vm: TareasViewModel) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Switch(checked = simularError, onCheckedChange = { vm.cambiarSimularError(it) })
                     Text("Simular error", modifier = Modifier.padding(start = 8.dp))
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Switch(checked = limiteActivo, onCheckedChange = { vm.cambiarLimite(it) })
+                    Text("Tiempo máximo 2 s", modifier = Modifier.padding(start = 8.dp))
                 }
                 when (val c = carga) {
                     CargaUi.Inicial -> Text("Elige cómo cargar el perfil y los pedidos")

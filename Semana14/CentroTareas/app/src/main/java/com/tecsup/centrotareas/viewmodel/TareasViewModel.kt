@@ -8,12 +8,14 @@ import com.tecsup.centrotareas.model.CargaUi
 import com.tecsup.centrotareas.model.PrimosUi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 
 class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
 
@@ -94,6 +96,13 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
         _simularError.value = valor
     }
 
+    private val _limiteActivo = MutableStateFlow(false)
+    val limiteActivo: StateFlow<Boolean> = _limiteActivo.asStateFlow()
+
+    fun cambiarLimite(valor: Boolean) {
+        _limiteActivo.value = valor
+    }
+
     // Primero el perfil (2 s) y después los pedidos (3 s): ≈ 5 s
     fun cargarUnaPorUna() = cargar("Una por una") {
         val perfil = repo.cargarPerfil()
@@ -120,10 +129,16 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
         viewModelScope.launch {
             val inicio = System.currentTimeMillis()
             try {
-                val (perfil, pedidos) = bloque()
+                val (perfil, pedidos) = if (_limiteActivo.value) {
+                    withTimeout(2000) { bloque() }
+                } else {
+                    bloque()
+                }
                 _carga.value = CargaUi.Exito(
                     modo, perfil, pedidos.size, System.currentTimeMillis() - inicio
                 )
+            } catch (e: TimeoutCancellationException) {
+                _carga.value = CargaUi.Error("Tardó demasiado (más de 2 s)")
             } catch (e: CancellationException) {
                 throw e // la cancelación no es un error: se deja pasar
             } catch (e: Exception) {
