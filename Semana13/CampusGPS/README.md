@@ -132,7 +132,7 @@ Desde Android 11, después de dos negativas el sistema ya no muestra el cuadro: 
 
 ## Fase 2 · Mejoras con IA (rama `mejora-ia-campusgps`)
 
-Cuatro mejoras hechas con Gemini en Android Studio, revisadas y corregidas a mano. El detalle de cada prompt está en [PROMPTS.md](PROMPTS.md).
+Hice cuatro mejoras usando Gemini dentro de Android Studio. Revisé y probé cada cambio antes del commit, y corregí lo que Gemini hizo mal. Los cuatro prompts completos, tal como se los escribí, y lo que cambié de cada respuesta están en [PROMPTS.md](PROMPTS.md).
 
 | Mejora | Capas |
 |---|---|
