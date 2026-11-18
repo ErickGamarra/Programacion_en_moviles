@@ -11,6 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -88,6 +89,9 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     private val _carga = MutableStateFlow<CargaUi>(CargaUi.Inicial)
     val carga: StateFlow<CargaUi> = _carga.asStateFlow()
 
+    private val _intento = MutableStateFlow(0)
+    val intento: StateFlow<Int> = _intento.asStateFlow()
+
     // Interruptor para que los pedidos fallen con "Sin conexión"
     private val _simularError = MutableStateFlow(false)
     val simularError: StateFlow<Boolean> = _simularError.asStateFlow()
@@ -122,6 +126,23 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     // El botón Reintentar vuelve a cargar a la vez
     fun reintentar() = cargarALaVez()
 
+    private suspend fun <T> conReintentos(veces: Int = 3, bloque: suspend () -> T): T {
+        for (numeroDeIntento in 1..veces) {
+            _intento.value = numeroDeIntento
+            try {
+                return bloque()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                if (numeroDeIntento == veces) {
+                    throw e
+                }
+                delay(500L * numeroDeIntento)
+            }
+        }
+        throw IllegalStateException("No se pudo completar tras $veces intentos")
+    }
+
     // Parte común: estado Cargando, mide el tiempo y atrapa los errores
     private fun cargar(modo: String, bloque: suspend () -> Pair<String, List<String>>) {
         if (_carga.value == CargaUi.Cargando) return
@@ -130,9 +151,9 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
             val inicio = System.currentTimeMillis()
             try {
                 val (perfil, pedidos) = if (_limiteActivo.value) {
-                    withTimeout(2000) { bloque() }
+                    withTimeout(2000) { conReintentos { bloque() } }
                 } else {
-                    bloque()
+                    conReintentos { bloque() }
                 }
                 _carga.value = CargaUi.Exito(
                     modo, perfil, pedidos.size, System.currentTimeMillis() - inicio

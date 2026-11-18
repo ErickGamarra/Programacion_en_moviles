@@ -52,6 +52,7 @@ fun PantallaTareas(vm: TareasViewModel) {
     val corriendo by vm.corriendo.collectAsState()
     val primos by vm.primos.collectAsState()
     val carga by vm.carga.collectAsState()
+    val intento by vm.intento.collectAsState()
     val simularError by vm.simularError.collectAsState()
     val limiteActivo by vm.limiteActivo.collectAsState()
     var textoN by rememberSaveable { mutableStateOf("$N_POR_DEFECTO") }
@@ -151,7 +152,9 @@ fun PantallaTareas(vm: TareasViewModel) {
                 }
                 when (val c = carga) {
                     CargaUi.Inicial -> Text("Elige cómo cargar el perfil y los pedidos")
-                    CargaUi.Cargando -> Text("Cargando...")
+                    CargaUi.Cargando -> Text(
+                        if (intento > 1) "Reintentando (intento $intento de 3)" else "Cargando..."
+                    )
                     is CargaUi.Exito -> Recuadro(
                         "Modo: ${c.modo}\nPerfil: ${c.perfil}\nPedidos: ${c.pedidos}\nTiempo: ${c.milisegundos} ms",
                         VerdeExito, VerdeExitoTexto
