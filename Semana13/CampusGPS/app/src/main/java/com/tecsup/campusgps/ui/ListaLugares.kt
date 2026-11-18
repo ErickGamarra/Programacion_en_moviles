@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +42,7 @@ fun ListaLugares(
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
     masCercanoId: Int?,
+    radioMetros: Int,
     onClick: (id: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -63,6 +65,7 @@ fun ListaLugares(
                 item = item,
                 esSeleccionado = item.lugar.id == seleccionado,
                 esMasCercano = item.lugar.id == masCercanoId,
+                radioMetros = radioMetros,
                 onClick = { onClick(item.lugar.id) }
             )
         }
@@ -74,6 +77,7 @@ private fun TarjetaLugar(
     item: LugarConDistancia,
     esSeleccionado: Boolean,
     esMasCercano: Boolean,
+    radioMetros: Int,
     onClick: () -> Unit
 ) {
     val colores = MaterialTheme.colorScheme
@@ -100,6 +104,20 @@ private fun TarjetaLugar(
             Column(Modifier.weight(1f)) {
                 Text(item.lugar.nombre, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
                 Text(item.lugar.categoria, color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                if (item.metros != null && item.metros <= radioMetros) {
+                    Surface(
+                        shape = CircleShape,
+                        color = colores.secondaryContainer,
+                        modifier = Modifier.padding(top = 2.dp)
+                    ) {
+                        Text(
+                            text = "Dentro del radio",
+                            color = colores.onSecondaryContainer,
+                            style = MaterialTheme.typography.labelSmall,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                }
             }
             Text(
                 text = item.metros?.let { formatearDistancia(it) } ?: "Sin calcular",

@@ -4,10 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberUpdatedMarkerState
@@ -21,6 +23,7 @@ fun MapaUbicacion(
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
     masCercanoId: Int?,
+    radioMetros: Int,
     modifier: Modifier = Modifier
 ) {
     val camara = rememberCameraPositionState {
@@ -42,11 +45,18 @@ fun MapaUbicacion(
     }
 
     GoogleMap(modifier = modifier, cameraPositionState = camara) {
-        // Marcador propio: rojo (el marcador por defecto)
+        // Círculo de cercanía y marcador propio: rojo (el marcador por defecto)
         if (estado is UbicacionUi.Lista) {
+            val centroUsuario = LatLng(estado.posicion.latitud, estado.posicion.longitud)
+            Circle(
+                center = centroUsuario,
+                radius = radioMetros.toDouble(),
+                strokeColor = Color.Blue.copy(alpha = 0.5f),
+                fillColor = Color.Blue.copy(alpha = 0.12f)
+            )
             Marker(
                 state = rememberUpdatedMarkerState(
-                    position = LatLng(estado.posicion.latitud, estado.posicion.longitud)
+                    position = centroUsuario
                 ),
                 title = "Estás aquí"
             )

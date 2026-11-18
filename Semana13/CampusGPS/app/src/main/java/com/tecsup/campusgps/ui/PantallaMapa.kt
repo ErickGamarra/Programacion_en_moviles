@@ -44,6 +44,7 @@ fun PantallaMapa(vm: MapaViewModel) {
     val categoriaSeleccionada by vm.categoria.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
+    val radio by vm.radio.collectAsState()
 
     val contexto = LocalContext.current
     val lanzador = rememberLauncherForActivityResult(
@@ -94,6 +95,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 lugares = lugaresVisibles,
                 seleccionado = seleccionado,
                 masCercanoId = masCercano?.id,
+                radioMetros = radio,
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
@@ -119,6 +121,12 @@ fun PantallaMapa(vm: MapaViewModel) {
                 ) {
                     Text("Ir al más cercano")
                 }
+
+                SelectorRadio(
+                    radios = vm.radiosDisponibles,
+                    seleccionado = radio,
+                    onCambiar = { vm.cambiarRadio(it) }
+                )
 
                 masCercano?.let { cercano ->
                     // Se busca en la lista completa: el más cercano puede estar oculto por el filtro
@@ -150,6 +158,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 lugares = lugaresVisibles,
                 seleccionado = seleccionado,
                 masCercanoId = masCercano?.id,
+                radioMetros = radio,
                 onClick = { vm.seleccionar(it) },
                 modifier = Modifier
                     .fillMaxWidth()
