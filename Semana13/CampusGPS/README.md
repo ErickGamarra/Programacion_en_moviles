@@ -130,6 +130,17 @@ En `util/Distancia.kt` (función pura) y la llamo desde `actualizarDistancias()`
 **5. ¿Qué pasa con tu app si el usuario niega el permiso dos veces? ¿Cómo lo manejas?**
 Desde Android 11, después de dos negativas el sistema ya no muestra el cuadro: el launcher responde "denegado" al instante. Como el resultado igual llega al callback, la app llama a `permisoDenegado()` y muestra el error con el botón **Abrir ajustes**, que abre la pantalla de la app con `Settings.ACTION_APPLICATION_DETAILS_SETTINGS` para que el usuario active la ubicación a mano. La app nunca se cierra.
 
+## Fase 2 · Mejoras con IA (rama `mejora-ia-campusgps`)
+
+Cuatro mejoras hechas con Gemini en Android Studio, revisadas y corregidas a mano. El detalle de cada prompt está en [PROMPTS.md](PROMPTS.md).
+
+| Mejora | Capas |
+|---|---|
+| Filtro por categoría con chips | ViewModel + View |
+| Radio de cercanía (100/200/500 m) con `Circle` | ViewModel + View |
+| Seguimiento en vivo (`requestLocationUpdates` + `callbackFlow`) | Repository + ViewModel + View |
+| Punto azul nativo, mapa oscuro y panel inferior deslizable | View |
+
 ## Commits de la Fase 1
 
 | N | Mensaje |
