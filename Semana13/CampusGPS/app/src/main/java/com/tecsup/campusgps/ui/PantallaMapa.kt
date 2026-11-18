@@ -128,7 +128,11 @@ fun PantallaMapa(vm: MapaViewModel) {
                     UbicacionUi.Inicial -> Text("Pulsa el botón para empezar")
                     UbicacionUi.Buscando -> CircularProgressIndicator()
                     is UbicacionUi.Lista -> Unit
-                    is UbicacionUi.Error -> Text(e.mensaje, color = MaterialTheme.colorScheme.error)
+                    is UbicacionUi.Error -> MensajeError(
+                        error = e,
+                        onReintentar = { alPulsar() },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
 
