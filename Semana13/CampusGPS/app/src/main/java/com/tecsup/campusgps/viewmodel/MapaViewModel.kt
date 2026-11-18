@@ -13,10 +13,12 @@ import com.tecsup.campusgps.model.TipoError
 import com.tecsup.campusgps.model.UbicacionUi
 import com.tecsup.campusgps.util.distanciaMetros
 import com.tecsup.campusgps.util.formatearDistancia
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -61,6 +63,11 @@ class MapaViewModel(
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
 
+    private var trabajoSeguimiento: Job? = null
+
+    private val _siguiendo = MutableStateFlow(false)
+    val siguiendo: StateFlow<Boolean> = _siguiendo.asStateFlow()
+
     fun filtrarPor(categoria: String?) {
         _categoria.value = categoria
     }
@@ -83,6 +90,36 @@ class MapaViewModel(
                 }
                 .onFailure { _estado.value = errorDe(it) }
         }
+    }
+
+    fun iniciarSeguimiento() {
+        if (!ubicacionRepo.playServicesDisponible()) {
+            _estado.value = UbicacionUi.Error(
+                "Este dispositivo no tiene Google Play Services",
+                TipoError.SIN_PLAY_SERVICES
+            )
+            return
+        }
+        trabajoSeguimiento?.cancel()
+        _siguiendo.value = true
+        trabajoSeguimiento = viewModelScope.launch {
+            ubicacionRepo.seguirPosicion()
+                .catch {
+                    // Mismo mapeo que buscar(): GPS apagado -> Reintentar, sin permiso -> Abrir ajustes
+                    _estado.value = errorDe(it)
+                    _siguiendo.value = false
+                }
+                .collect { pos ->
+                    _estado.value = UbicacionUi.Lista(pos)
+                    actualizarDistancias(pos)
+                }
+        }
+    }
+
+    fun detenerSeguimiento() {
+        trabajoSeguimiento?.cancel()
+        trabajoSeguimiento = null
+        _siguiendo.value = false
     }
 
     fun permisoDenegado() {
@@ -122,6 +159,11 @@ class MapaViewModel(
             e.message ?: "No se pudo obtener la ubicación",
             TipoError.OTRO
         )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        trabajoSeguimiento?.cancel()
     }
 
     private companion object {

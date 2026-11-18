@@ -4,15 +4,21 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -22,8 +28,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -45,24 +55,37 @@ fun PantallaMapa(vm: MapaViewModel) {
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
     val radio by vm.radio.collectAsState()
+    val siguiendo by vm.siguiendo.collectAsState()
 
     val contexto = LocalContext.current
+    var accionPendiente by remember { mutableStateOf<(() -> Unit)?>(null) }
+
     val lanzador = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { resultado ->
-        // Basta con FINE o COARSE: con la aproximada también podemos ubicar al usuario
-        if (resultado.values.any { it }) vm.buscar() else vm.permisoDenegado()
+        if (resultado.values.any { it }) {
+            accionPendiente?.invoke()
+            accionPendiente = null
+        } else {
+            vm.permisoDenegado()
+            accionPendiente = null
+        }
     }
 
     fun tienePermiso(permiso: String) =
         ContextCompat.checkSelfPermission(contexto, permiso) == PackageManager.PERMISSION_GRANTED
 
-    fun alPulsar() {
+    fun ejecutarConPermiso(accion: () -> Unit) {
         if (tienePermiso(FINE) || tienePermiso(COARSE)) {
-            vm.buscar()
+            accion()
         } else {
+            accionPendiente = accion
             lanzador.launch(arrayOf(FINE, COARSE))
         }
+    }
+
+    fun alPulsar() {
+        ejecutarConPermiso { vm.buscar() }
     }
 
     Scaffold(
@@ -115,11 +138,47 @@ fun PantallaMapa(vm: MapaViewModel) {
                     Text("Obtener mi ubicación")
                 }
 
-                OutlinedButton(
-                    onClick = { masCercano?.let { vm.seleccionar(it.id) } },
-                    enabled = masCercano != null
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Ir al más cercano")
+                    OutlinedButton(
+                        onClick = { masCercano?.let { vm.seleccionar(it.id) } },
+                        enabled = masCercano != null
+                    ) {
+                        Text("Ir al más cercano")
+                    }
+
+                    FilledTonalButton(
+                        onClick = {
+                            if (siguiendo) {
+                                vm.detenerSeguimiento()
+                            } else {
+                                ejecutarConPermiso { vm.iniciarSeguimiento() }
+                            }
+                        }
+                    ) {
+                        Text(if (siguiendo) "Detener seguimiento" else "Iniciar seguimiento")
+                    }
+                }
+
+                if (siguiendo) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(Color.Red, shape = CircleShape)
+                        )
+                        Text(
+                            text = "En vivo",
+                            color = Color.Red,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
 
                 SelectorRadio(
