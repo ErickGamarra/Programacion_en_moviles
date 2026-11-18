@@ -11,14 +11,15 @@ import com.tecsup.campusgps.model.LugarConDistancia
 import com.tecsup.campusgps.model.Posicion
 import com.tecsup.campusgps.model.TipoError
 import com.tecsup.campusgps.model.UbicacionUi
+import com.tecsup.campusgps.util.distanciaMetros
+import com.tecsup.campusgps.util.formatearDistancia
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import com.tecsup.campusgps.util.distanciaMetros
-import com.tecsup.campusgps.util.formatearDistancia
 import kotlinx.coroutines.launch
 
 class MapaViewModel(
@@ -34,6 +35,15 @@ class MapaViewModel(
     )
     val lugares: StateFlow<List<LugarConDistancia>> = _lugares.asStateFlow()
 
+    private val _categoria = MutableStateFlow<String?>(null)
+    val categoria: StateFlow<String?> = _categoria.asStateFlow()
+
+    val categorias: List<String> = lugaresRepo.obtenerLugares().map { it.categoria }.distinct()
+
+    val lugaresVisibles: StateFlow<List<LugarConDistancia>> = combine(lugares, categoria) { lista, cat ->
+        if (cat == null) lista else lista.filter { it.lugar.categoria == cat }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), _lugares.value)
+
     // Derivado de lugares: como la lista ya viene ordenada, el primero con distancia es el más cercano
     val masCercano: StateFlow<Lugar?> = lugares
         .map { lista -> lista.firstOrNull { it.metros != null }?.lugar }
@@ -41,6 +51,10 @@ class MapaViewModel(
 
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
+
+    fun filtrarPor(categoria: String?) {
+        _categoria.value = categoria
+    }
 
     fun buscar() {
         // Sin Play Services no hay FusedLocationProvider ni mapa: no tiene sentido reintentar

@@ -6,7 +6,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,6 +40,8 @@ import com.tecsup.campusgps.viewmodel.MapaViewModel
 fun PantallaMapa(vm: MapaViewModel) {
     val estado by vm.estado.collectAsState()
     val lugares by vm.lugares.collectAsState()
+    val lugaresVisibles by vm.lugaresVisibles.collectAsState()
+    val categoriaSeleccionada by vm.categoria.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
 
@@ -80,10 +81,17 @@ fun PantallaMapa(vm: MapaViewModel) {
                 .padding(padding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            FiltroCategorias(
+                categorias = vm.categorias,
+                seleccionada = categoriaSeleccionada,
+                onSeleccionar = { vm.filtrarPor(it) },
+                modifier = Modifier.fillMaxWidth()
+            )
+
             // El mapa ocupa todo el espacio libre de arriba
             MapaUbicacion(
                 estado = estado,
-                lugares = lugares,
+                lugares = lugaresVisibles,
                 seleccionado = seleccionado,
                 masCercanoId = masCercano?.id,
                 modifier = Modifier
@@ -113,6 +121,7 @@ fun PantallaMapa(vm: MapaViewModel) {
                 }
 
                 masCercano?.let { cercano ->
+                    // Se busca en la lista completa: el más cercano puede estar oculto por el filtro
                     val metros = lugares.firstOrNull { it.lugar.id == cercano.id }?.metros
                     Text(
                         text = buildAnnotatedString {
@@ -138,7 +147,7 @@ fun PantallaMapa(vm: MapaViewModel) {
 
             // Lista con altura fija debajo del mapa
             ListaLugares(
-                lugares = lugares,
+                lugares = lugaresVisibles,
                 seleccionado = seleccionado,
                 masCercanoId = masCercano?.id,
                 onClick = { vm.seleccionar(it) },
