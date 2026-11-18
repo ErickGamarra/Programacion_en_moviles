@@ -1,5 +1,7 @@
 package com.tecsup.campusgps.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.tecsup.campusgps.model.UbicacionUi
 import com.tecsup.campusgps.viewmodel.MapaViewModel
 
@@ -36,12 +39,19 @@ fun PantallaMapa(vm: MapaViewModel) {
     val lanzador = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { resultado ->
-        // TODO 1: si algún valor es true -> vm.buscar(); si no -> vm.permisoDenegado()
+        // Basta con FINE o COARSE: con la aproximada también podemos ubicar al usuario
+        if (resultado.values.any { it }) vm.buscar() else vm.permisoDenegado()
     }
 
+    fun tienePermiso(permiso: String) =
+        ContextCompat.checkSelfPermission(contexto, permiso) == PackageManager.PERMISSION_GRANTED
+
     fun alPulsar() {
-        // TODO 2: ¿ya tienes FINE o COARSE? -> vm.buscar()
-        // TODO 3: si no -> lanzador.launch(arrayOf(FINE, COARSE))
+        if (tienePermiso(FINE) || tienePermiso(COARSE)) {
+            vm.buscar()
+        } else {
+            lanzador.launch(arrayOf(FINE, COARSE))
+        }
     }
 
     Scaffold(
@@ -83,3 +93,6 @@ fun PantallaMapa(vm: MapaViewModel) {
         }
     }
 }
+
+private const val FINE = Manifest.permission.ACCESS_FINE_LOCATION
+private const val COARSE = Manifest.permission.ACCESS_COARSE_LOCATION
