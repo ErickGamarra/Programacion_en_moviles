@@ -58,7 +58,11 @@ class MapaViewModel(
         }
     }
 
-    // TODO Paso 6: fun seleccionar(id: Int?)
+    // La lista (o el botón del más cercano) avisa qué lugar mostrar; el mapa reacciona al cambio
+    fun seleccionar(id: Int?) {
+        _seleccionado.value = id
+    }
+
     // TODO Paso 7: val masCercano: StateFlow<Lugar?>
 
     private fun mensajeDe(e: Throwable): String = when (e) {

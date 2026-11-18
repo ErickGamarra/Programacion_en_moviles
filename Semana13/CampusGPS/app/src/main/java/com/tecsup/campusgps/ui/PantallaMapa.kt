@@ -87,7 +87,7 @@ fun PantallaMapa(vm: MapaViewModel) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -97,18 +97,24 @@ fun PantallaMapa(vm: MapaViewModel) {
                 ) {
                     Text("Obtener mi ubicación")
                 }
-                Spacer(Modifier.height(4.dp))
 
                 when (val e = estado) {
                     UbicacionUi.Inicial -> Text("Pulsa el botón para empezar")
                     UbicacionUi.Buscando -> CircularProgressIndicator()
-                    is UbicacionUi.Lista -> {
-                        Text("Latitud: ${e.posicion.latitud}")
-                        Text("Longitud: ${e.posicion.longitud}")
-                    }
+                    is UbicacionUi.Lista -> Unit
                     is UbicacionUi.Error -> Text(e.mensaje, color = MaterialTheme.colorScheme.error)
                 }
             }
+
+            // Lista con altura fija debajo del mapa
+            ListaLugares(
+                lugares = lugares,
+                seleccionado = seleccionado,
+                onClick = { vm.seleccionar(it) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+            )
         }
     }
 }

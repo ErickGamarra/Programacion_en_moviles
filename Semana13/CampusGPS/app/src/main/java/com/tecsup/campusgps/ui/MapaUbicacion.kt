@@ -34,6 +34,12 @@ fun MapaUbicacion(
         }
     }
 
+    // Al tocar una tarjeta, la cámara se acerca al lugar elegido
+    LaunchedEffect(seleccionado) {
+        val lugar = lugares.firstOrNull { it.lugar.id == seleccionado }?.lugar ?: return@LaunchedEffect
+        camara.animate(CameraUpdateFactory.newLatLngZoom(LatLng(lugar.latitud, lugar.longitud), 17f))
+    }
+
     GoogleMap(modifier = modifier, cameraPositionState = camara) {
         // Marcador propio: rojo (el marcador por defecto)
         if (estado is UbicacionUi.Lista) {
