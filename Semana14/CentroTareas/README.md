@@ -94,6 +94,16 @@ Contar primos usa mucho procesador, y `Default` tiene tantos hilos como núcleos
 **5. ¿Por qué async tarda 3 s y no 5 s? ¿Qué pasa si una de las dos cargas falla?**
 Porque las dos cargas arrancan al mismo tiempo y solo espero a la más lenta (3 s). Una por una se suman (2 s + 3 s). Si una falla dentro de `coroutineScope`, se cancela la otra y el error sube hasta mi `try/catch`, que muestra el recuadro rojo con Reintentar.
 
+## Fase 2 · Mejoras con IA (rama `mejora-ia-centrotareas`)
+
+Hice tres mejoras con Gemini dentro de Android Studio, revisando y probando cada cambio. Los prompts completos y lo que cambié de cada respuesta están en [PROMPTS.md](PROMPTS.md).
+
+| Mejora | Capas |
+|---|---|
+| Progreso de la tarea desde el Repository con `Flow` | Repository + ViewModel |
+| Tiempo máximo de 2 s con `withTimeout` | ViewModel + pantalla |
+| Reintento automático hasta 3 veces con espera creciente | ViewModel + pantalla |
+
 ## Commits de la Fase 1
 
 | N | Mensaje |
