@@ -5,9 +5,10 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-// TODO (Paso 1): lee local.properties (si existe) y úsalo en defaultConfig
+// La clave de Maps vive en local.properties (ignorado por git), nunca en el código
 val localProps = Properties().apply {
-    // TODO: cargar rootProject.file("local.properties")
+    val archivo = rootProject.file("local.properties")
+    if (archivo.exists()) archivo.inputStream().use { load(it) }
 }
 
 android {
@@ -25,7 +26,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // TODO (Paso 1): manifestPlaceholders["MAPS_API_KEY"] = ...
+        // Se inyecta en el <meta-data> del Manifest como ${MAPS_API_KEY}
+        manifestPlaceholders["MAPS_API_KEY"] = localProps.getProperty("MAPS_API_KEY", "")
     }
 
     buildTypes {
