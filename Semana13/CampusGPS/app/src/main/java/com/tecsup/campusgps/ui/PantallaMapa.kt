@@ -11,17 +11,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -42,6 +44,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.tecsup.campusgps.model.UbicacionUi
+import com.tecsup.campusgps.ui.theme.AzulCampus
 import com.tecsup.campusgps.util.formatearDistancia
 import com.tecsup.campusgps.viewmodel.MapaViewModel
 
@@ -88,46 +91,28 @@ fun PantallaMapa(vm: MapaViewModel) {
         ejecutarConPermiso { vm.buscar() }
     }
 
-    Scaffold(
+    val permisoConcedido = remember(estado) {
+        tienePermiso(FINE) || tienePermiso(COARSE)
+    }
+
+    BottomSheetScaffold(
+        sheetPeekHeight = 260.dp,
         topBar = {
             TopAppBar(
                 title = { Text("CampusGPS", fontWeight = FontWeight.Bold) },
+                // Azul institucional fijo: en tema oscuro el primary es celeste y el título perdía contraste
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = AzulCampus,
+                    titleContentColor = Color.White
                 )
             )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            FiltroCategorias(
-                categorias = vm.categorias,
-                seleccionada = categoriaSeleccionada,
-                onSeleccionar = { vm.filtrarPor(it) },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // El mapa ocupa todo el espacio libre de arriba
-            MapaUbicacion(
-                estado = estado,
-                lugares = lugaresVisibles,
-                seleccionado = seleccionado,
-                masCercanoId = masCercano?.id,
-                radioMetros = radio,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            )
-
+        },
+        sheetContent = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .navigationBarsPadding(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -210,19 +195,48 @@ fun PantallaMapa(vm: MapaViewModel) {
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-            }
 
-            // Lista con altura fija debajo del mapa
-            ListaLugares(
+                ListaLugares(
+                    lugares = lugaresVisibles,
+                    seleccionado = seleccionado,
+                    masCercanoId = masCercano?.id,
+                    radioMetros = radio,
+                    onClick = { vm.seleccionar(it) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 360.dp)
+                )
+            }
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            MapaUbicacion(
+                estado = estado,
                 lugares = lugaresVisibles,
                 seleccionado = seleccionado,
                 masCercanoId = masCercano?.id,
                 radioMetros = radio,
-                onClick = { vm.seleccionar(it) },
+                permisoConcedido = permisoConcedido,
+                modifier = Modifier.fillMaxSize()
+            )
+
+            Surface(
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(220.dp)
-            )
+                    .align(Alignment.TopCenter)
+            ) {
+                FiltroCategorias(
+                    categorias = vm.categorias,
+                    seleccionada = categoriaSeleccionada,
+                    onSeleccionar = { vm.filtrarPor(it) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
