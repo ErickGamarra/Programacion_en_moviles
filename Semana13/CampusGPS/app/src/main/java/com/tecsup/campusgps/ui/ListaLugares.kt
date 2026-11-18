@@ -30,6 +30,9 @@ import androidx.compose.ui.unit.dp
 import com.tecsup.campusgps.model.LugarConDistancia
 import com.tecsup.campusgps.util.formatearDistancia
 
+// Mismo verde que HUE_GREEN del marcador
+private val VerdeCercano = Color(0xFF2E9E44)
+
 /**
  * Lista de lugares ordenada. No conoce el ViewModel: recibe los datos y avisa el clic con el id.
  */
@@ -37,6 +40,7 @@ import com.tecsup.campusgps.util.formatearDistancia
 fun ListaLugares(
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
+    masCercanoId: Int?,
     onClick: (id: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -58,6 +62,7 @@ fun ListaLugares(
             TarjetaLugar(
                 item = item,
                 esSeleccionado = item.lugar.id == seleccionado,
+                esMasCercano = item.lugar.id == masCercanoId,
                 onClick = { onClick(item.lugar.id) }
             )
         }
@@ -68,6 +73,7 @@ fun ListaLugares(
 private fun TarjetaLugar(
     item: LugarConDistancia,
     esSeleccionado: Boolean,
+    esMasCercano: Boolean,
     onClick: () -> Unit
 ) {
     val colores = MaterialTheme.colorScheme
@@ -88,7 +94,7 @@ private fun TarjetaLugar(
                 Modifier
                     .size(10.dp)
                     .clip(CircleShape)
-                    .background(colores.primary)
+                    .background(if (esMasCercano) VerdeCercano else colores.primary)
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
