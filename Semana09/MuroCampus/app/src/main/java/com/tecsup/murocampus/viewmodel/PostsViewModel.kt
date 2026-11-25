@@ -33,6 +33,10 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _publicacion = MutableStateFlow<UiState<Post>?>(null)
     val publicacion = _publicacion.asStateFlow()
 
+    // null = todavía no se borró nada
+    private val _borrado = MutableStateFlow<UiState<Unit>?>(null)
+    val borrado = _borrado.asStateFlow()
+
     private var trabajoDetalle: Job? = null
 
     init { cargar() }
@@ -55,6 +59,7 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     }
 
     fun abrir(id: Int) {
+        _borrado.value = null
         trabajoDetalle?.cancel()          // si se abre otra publicación, se olvida la anterior
         trabajoDetalle = viewModelScope.launch {
             _detalle.value = UiState.Cargando
@@ -83,6 +88,22 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
             repo.crear(NuevoPost(userId = 1, title = titulo, body = texto))
                 .onSuccess { _publicacion.value = UiState.Exito(it) }
                 .onFailure { _publicacion.value = UiState.Error(mensajeDe(it)) }
+        }
+    }
+
+    fun borrar(id: Int) {
+        viewModelScope.launch {
+            _borrado.value = UiState.Cargando
+            repo.borrar(id)
+                .onSuccess {
+                    _borrado.value = UiState.Exito(it)
+                    // JSONPlaceholder no borra de verdad: se quita de la lista local en vez de recargar
+                    val actual = _lista.value
+                    if (actual is UiState.Exito) {
+                        _lista.value = UiState.Exito(actual.datos.filterNot { post -> post.id == id })
+                    }
+                }
+                .onFailure { _borrado.value = UiState.Error(mensajeDe(it)) }
         }
     }
 

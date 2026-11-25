@@ -5,6 +5,7 @@ import com.tecsup.murocampus.model.Comentario
 import com.tecsup.murocampus.model.NuevoPost
 import com.tecsup.murocampus.model.Post
 import kotlin.coroutines.cancellation.CancellationException
+import retrofit2.HttpException
 
 // Lo único que conoce el ViewModel: funciones que devuelven Result
 interface PostRepository {
@@ -13,6 +14,7 @@ interface PostRepository {
     suspend fun comentarios(id: Int): Result<List<Comentario>>
     suspend fun porUsuario(userId: Int): Result<List<Post>>
     suspend fun crear(nuevo: NuevoPost): Result<Post>
+    suspend fun borrar(id: Int): Result<Unit>
 }
 
 class PostRepositoryRemote(private val api: PostApi) : PostRepository {
@@ -26,6 +28,13 @@ class PostRepositoryRemote(private val api: PostApi) : PostRepository {
     override suspend fun porUsuario(userId: Int) = llamar { api.porUsuario(userId) }
 
     override suspend fun crear(nuevo: NuevoPost) = llamar { api.crear(nuevo) }
+
+    override suspend fun borrar(id: Int): Result<Unit> = llamar {
+        val response = api.borrar(id)
+        if (response.code() !in 200..299) {
+            throw HttpException(response)
+        }
+    }
 
     // Un solo try/catch para las cinco llamadas: ninguna excepción sale del Repository
     private suspend fun <T> llamar(bloque: suspend () -> T): Result<T> =
