@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.tecsup.murocampus.ui.PantallaCrear
 import com.tecsup.murocampus.ui.PantallaDetalle
 import com.tecsup.murocampus.ui.PantallaLista
 import com.tecsup.murocampus.ui.theme.MuroCampusTheme
@@ -37,6 +39,7 @@ class MainActivity : ComponentActivity() {
             MuroCampusTheme {
                 // null = se ve la lista; un id = se ve el detalle de esa publicación
                 var idSeleccionado by rememberSaveable { mutableStateOf<Int?>(null) }
+                var creando by rememberSaveable { mutableStateOf(false) }
 
                 Scaffold(
                     topBar = {
@@ -47,10 +50,24 @@ class MainActivity : ComponentActivity() {
                                 titleContentColor = MaterialTheme.colorScheme.onPrimary
                             )
                         )
+                    },
+                    floatingActionButton = {
+                        // El + solo aparece en la lista
+                        if (idSeleccionado == null && !creando) {
+                            FloatingActionButton(onClick = {
+                                vm.nuevaPublicacion()
+                                creando = true
+                            }) {
+                                Text("+", style = MaterialTheme.typography.headlineMedium)
+                            }
+                        }
                     }
                 ) { padding ->
                     val id = idSeleccionado
-                    if (id == null) {
+                    if (creando) {
+                        BackHandler { creando = false }
+                        PantallaCrear(vm, Modifier.padding(padding))
+                    } else if (id == null) {
                         PantallaLista(
                             vm = vm,
                             onAbrir = { idPost ->

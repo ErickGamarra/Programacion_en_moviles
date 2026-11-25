@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tecsup.murocampus.data.PostRepository
 import com.tecsup.murocampus.model.Comentario
+import com.tecsup.murocampus.model.NuevoPost
 import com.tecsup.murocampus.model.Post
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -27,6 +28,10 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     // null significa Todos
     private val _usuarioFiltro = MutableStateFlow<Int?>(null)
     val usuarioFiltro = _usuarioFiltro.asStateFlow()
+
+    // null = todavía no se envió nada
+    private val _publicacion = MutableStateFlow<UiState<Post>?>(null)
+    val publicacion = _publicacion.asStateFlow()
 
     private var trabajoDetalle: Job? = null
 
@@ -70,5 +75,19 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
                 onFailure = { UiState.Error(mensajeDe(it)) }
             )
         }
+    }
+
+    fun publicar(titulo: String, texto: String) {
+        viewModelScope.launch {
+            _publicacion.value = UiState.Cargando
+            repo.crear(NuevoPost(userId = 1, title = titulo, body = texto))
+                .onSuccess { _publicacion.value = UiState.Exito(it) }
+                .onFailure { _publicacion.value = UiState.Error(mensajeDe(it)) }
+        }
+    }
+
+    // Al entrar de nuevo al formulario no se muestra el mensaje anterior
+    fun nuevaPublicacion() {
+        _publicacion.value = null
     }
 }
