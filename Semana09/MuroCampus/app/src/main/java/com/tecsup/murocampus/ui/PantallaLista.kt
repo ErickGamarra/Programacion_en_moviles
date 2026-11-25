@@ -1,3 +1,4 @@
+
 package com.tecsup.murocampus.ui
 
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +17,11 @@ import com.tecsup.murocampus.viewmodel.UiState
 
 // La pantalla solo dibuja el estado: no sabe de dónde vienen los datos
 @Composable
-fun PantallaLista(vm: PostsViewModel, modifier: Modifier = Modifier) {
+fun PantallaLista(
+    vm: PostsViewModel,
+    onAbrir: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val estado by vm.lista.collectAsStateWithLifecycle()
 
     Box(modifier.fillMaxSize()) {
@@ -32,7 +37,7 @@ fun PantallaLista(vm: PostsViewModel, modifier: Modifier = Modifier) {
                         userId = post.userId,
                         titulo = post.title,
                         texto = post.body,
-                        onClick = { }
+                        onClick = { onAbrir(post.id) }
                     )
                 }
             }
