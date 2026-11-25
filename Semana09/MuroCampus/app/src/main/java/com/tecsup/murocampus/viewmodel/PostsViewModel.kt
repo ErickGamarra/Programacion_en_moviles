@@ -37,6 +37,11 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _borrado = MutableStateFlow<UiState<Unit>?>(null)
     val borrado = _borrado.asStateFlow()
 
+    private val _textoBusqueda = MutableStateFlow("")
+    val textoBusqueda = _textoBusqueda.asStateFlow()
+
+    private var postsCache: List<Post> = emptyList()
+
     private var trabajoDetalle: Job? = null
 
     init { cargar() }
@@ -48,7 +53,10 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
             val userId = _usuarioFiltro.value
             val resultado = if (userId == null) repo.listar() else repo.porUsuario(userId)
             resultado
-                .onSuccess { _lista.value = UiState.Exito(it) }
+                .onSuccess {
+                    postsCache = it
+                    aplicarFiltroBusqueda()
+                }
                 .onFailure { _lista.value = UiState.Error(mensajeDe(it)) }
         }
     }
@@ -98,13 +106,27 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
                 .onSuccess {
                     _borrado.value = UiState.Exito(it)
                     // JSONPlaceholder no borra de verdad: se quita de la lista local en vez de recargar
-                    val actual = _lista.value
-                    if (actual is UiState.Exito) {
-                        _lista.value = UiState.Exito(actual.datos.filterNot { post -> post.id == id })
-                    }
+                    postsCache = postsCache.filterNot { post -> post.id == id }
+                    aplicarFiltroBusqueda()
                 }
                 .onFailure { _borrado.value = UiState.Error(mensajeDe(it)) }
         }
+    }
+
+    fun buscar(texto: String) {
+        _textoBusqueda.value = texto
+        // Solo se filtra si ya hay publicaciones descargadas: no se tapa un Cargando o un Error
+        if (_lista.value is UiState.Exito) aplicarFiltroBusqueda()
+    }
+
+    private fun aplicarFiltroBusqueda() {
+        val query = _textoBusqueda.value.trim()
+        val filtrados = if (query.isEmpty()) {
+            postsCache
+        } else {
+            postsCache.filter { it.title.contains(query, ignoreCase = true) }
+        }
+        _lista.value = UiState.Exito(filtrados)
     }
 
     // Al entrar de nuevo al formulario no se muestra el mensaje anterior
