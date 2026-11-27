@@ -53,10 +53,18 @@ object Notificador {
         val canal = if (aviso.urgente) CANAL_URGENTE else CANAL
         val prioridad = if (aviso.urgente) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT
 
+        // Texto largo: se ve completo al expandir la notificación
+        val textoCompleto = "${aviso.texto}.\nOrigen: ${aviso.origen.texto} · registrado a las ${aviso.hora}." +
+            "\nToca la notificación para abrir AvisosCampus y ver el historial."
+        val estiloLargo = NotificationCompat.BigTextStyle()
+            .bigText(textoCompleto)
+            .setSummaryText(aviso.origen.texto)
+
         val notificacion = NotificationCompat.Builder(context, canal)
             .setSmallIcon(R.drawable.ic_notificacion)
             .setContentTitle(aviso.titulo)
             .setContentText(aviso.texto)
+            .setStyle(estiloLargo)
             .setPriority(prioridad)
             .setContentIntent(pendiente)
             .setAutoCancel(true)   // se quita del panel al tocarla
