@@ -12,7 +12,9 @@ import com.tecsup.avisoscampus.viewmodel.AvisosViewModelFactory
 
 class MainActivity : ComponentActivity() {
 
-    private val vm: AvisosViewModel by viewModels { AvisosViewModelFactory() }
+    private val vm: AvisosViewModel by viewModels {
+        AvisosViewModelFactory((application as AvisosApp).repositorio)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
