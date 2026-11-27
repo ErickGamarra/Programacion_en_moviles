@@ -21,6 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -48,6 +49,7 @@ import com.tecsup.avisoscampus.viewmodel.AvisosViewModel
 fun PantallaAvisos(vm: AvisosViewModel) {
     val contexto = LocalContext.current
     val permiso by vm.permiso.collectAsState()
+    val faltan by vm.faltan.collectAsState()
 
     val lanzador = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -118,7 +120,32 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 }
             }
             Tarjeta("Recordatorio") {
-                // TODO Paso 5: "Recordar en 10 s", "Cancelar" y "Faltan N s"
+                val corriendo = faltan != null
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+                ) {
+                    Button(onClick = { vm.recordarEn(10) }, enabled = !corriendo) {
+                        Text("Recordar en 10 s", fontWeight = FontWeight.Bold)
+                    }
+                    OutlinedButton(
+                        onClick = { vm.cancelarRecordatorio() },
+                        enabled = corriendo,
+                        border = BorderStroke(
+                            1.5.dp,
+                            if (corriendo) MaterialTheme.colorScheme.primary else BordeTarjeta
+                        )
+                    ) {
+                        Text("Cancelar", fontWeight = FontWeight.Bold)
+                    }
+                }
+                faltan?.let { s ->
+                    Text(
+                        "Faltan $s s",
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
             }
             Tarjeta("Receptor de anuncios") {
                 // TODO Paso 6: Switch "Escuchar el modo avión"
