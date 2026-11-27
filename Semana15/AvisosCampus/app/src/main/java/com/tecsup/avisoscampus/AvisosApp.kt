@@ -1,5 +1,12 @@
 package com.tecsup.avisoscampus
 
-// TODO Paso 1: class AvisosApp : Application()
-//   En onCreate llama a Notificador.crearCanal(this)
-//   y regístrala en el Manifest con android:name=".AvisosApp"
+import android.app.Application
+import com.tecsup.avisoscampus.notificacion.Notificador
+
+class AvisosApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        // El canal se crea una sola vez, antes de que se abra cualquier pantalla
+        Notificador.crearCanal(this)
+    }
+}
