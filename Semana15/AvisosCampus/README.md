@@ -93,6 +93,20 @@ La segunda reemplaza a la primera y en el panel queda una sola. Por eso uso `avi
 **5. ¿En qué casos usarías una notificación local y en cuáles una push de Firebase?**
 Local cuando el aviso nace en el propio celular: un recordatorio, una tarea que terminó, un cambio del sistema como el modo avión. Push cuando la información viene de un servidor y la app puede estar cerrada: un mensaje nuevo, una nota publicada o un aviso que el docente manda a todo el curso.
 
+## Fase 2 · Mejoras (rama mejora-ia-avisoscampus)
+
+| Mejora | Qué hace | Capas que cambian |
+|---|---|---|
+| Dos canales | El recordatorio sale por el canal Urgentes (`IMPORTANCE_HIGH`) y aparece emergente | Notificador + modelo + ViewModel |
+| Texto largo | Al expandir la notificación se ve el texto completo con `BigTextStyle` | Notificador |
+| Historial persistente | El historial se guarda con DataStore y sigue ahí al reabrir la app | Repository + AvisosApp + fábrica del ViewModel |
+
+| Notificación urgente | Dos canales | Texto largo | Historial guardado |
+|---|---|---|---|
+| ![](capturas/6_urgente.png) | ![](capturas/7_canales.png) | ![](capturas/8_texto_largo.png) | ![](capturas/9_historial_guardado.png) |
+
+Los prompts, lo que cambié y por qué están en [PROMPTS.md](PROMPTS.md).
+
 ## Commits de la Fase 1
 
 | N | Mensaje |
@@ -107,3 +121,12 @@ Local cuando el aviso nace en el propio celular: un recordatorio, una tarea que 
 | 8 | feat(ui): agrega historial de avisos |
 | 9 | feat(errores): maneja el permiso de notificaciones denegado |
 | 10 | docs: agrega README con estructura y capturas |
+
+## Commits de la Fase 2
+
+| N | Mensaje |
+|---|---|
+| 1 | feat(canales): agrega el canal Urgentes con IMPORTANCE_HIGH para el recordatorio |
+| 2 | feat(notificacion): muestra el texto completo al expandir con BigTextStyle |
+| 3 | feat(historial): guarda el historial con DataStore para que no se pierda al cerrar |
+| 4 | docs: agrega PROMPTS.md y las mejoras de la Fase 2 al README |
