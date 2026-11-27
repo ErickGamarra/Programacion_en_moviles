@@ -18,13 +18,17 @@ import com.tecsup.avisoscampus.model.Aviso
 
 object Notificador {
     const val CANAL = "avisos"
+    const val CANAL_URGENTE = "urgentes"
 
     fun crearCanal(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val canal = NotificationChannel(CANAL, "Avisos", NotificationManager.IMPORTANCE_DEFAULT)
             canal.description = "Notificaciones de la app"
+            // IMPORTANCE_HIGH hace que la notificación aparezca emergente arriba de la pantalla
+            val urgente = NotificationChannel(CANAL_URGENTE, "Urgentes", NotificationManager.IMPORTANCE_HIGH)
+            urgente.description = "Recordatorios que no debes perder"
             val manager = context.getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(canal)
+            manager.createNotificationChannels(listOf(canal, urgente))
         }
     }
 
@@ -45,11 +49,15 @@ object Notificador {
         val intent = Intent(context, MainActivity::class.java)
         val pendiente = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
-        val notificacion = NotificationCompat.Builder(context, CANAL)
+        // El canal lo decide el aviso: el ViewModel marca como urgente al recordatorio
+        val canal = if (aviso.urgente) CANAL_URGENTE else CANAL
+        val prioridad = if (aviso.urgente) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_DEFAULT
+
+        val notificacion = NotificationCompat.Builder(context, canal)
             .setSmallIcon(R.drawable.ic_notificacion)
             .setContentTitle(aviso.titulo)
             .setContentText(aviso.texto)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(prioridad)
             .setContentIntent(pendiente)
             .setAutoCancel(true)   // se quita del panel al tocarla
             .build()
